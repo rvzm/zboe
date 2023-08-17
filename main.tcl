@@ -43,7 +43,7 @@ namespace eval zboe {
 			if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| main command var 1 set"; }
 			if {$v1 == ""} {
 				if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| main command recieved no input, informing chan and halting"; }
-				puthelp "PRIVMSG $chan :\037ERROR\037: Incorrect Parameters. \037SYNTAX\037: [zboe::util::getTrigger]zboe help"; return
+				puthelp "PRIVMSG $chan :\037ERROR\037: Incorrect Parameters. \037SYNTAX\037: [zboe::procs::util::getTrigger]zboe help"; return
 			}
 			if {$v1 == "hunt"} {
 				if {${zboe::settings::debug} == "1"} { putcmdlog "*** zboe|debug| main command recieved control for hunt - $v2"; }
@@ -99,7 +99,7 @@ namespace eval zboe {
 			if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| zombie interact command var 1 set"; }
 			if {$v1 == ""} {
 				if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| zombie interact command recieved no input, informing chan and halting"; }
-				puthelp "PRIVMSG $chan :\037ERROR\037: Incorrect Parameters. \037SYNTAX\037: [zboe::util::getTrigger]zboe help"; return
+				puthelp "PRIVMSG $chan :\037ERROR\037: Incorrect Parameters. \037SYNTAX\037: [zboe::procs::util::getTrigger]zboe help"; return
 			}
 			if {$v1 == ""} {
 				if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| zombie interact command recieved command for "; }
@@ -133,24 +133,24 @@ namespace eval zboe {
 				}
 			if {$v1 == "restart"} { restart; return }
 			if {$v1 == "die"} { die; return }
-			if {$v1 == "info"} { putserv "PRIVMSG $chan :zboe.tcl running version [zboe::util::getVersion]"; return }
-			if {$v1 == "register"} { putserv "PRIVMSG NickServ :REGISTER [zboe::util::getPass] [zboe::util::getEmail]"; return }
-			if {$v1 == "group"} { putserv "PRIVMSG NickServ :GROUP [zboe::util::getGroupNick] [zboe::util::getPass]"; return }
+			if {$v1 == "info"} { putserv "PRIVMSG $chan :zboe.tcl running version [zboe::procs::util::getVersion]"; return }
+			if {$v1 == "register"} { putserv "PRIVMSG NickServ :REGISTER [zboe::procs::util::getPass] [zboe::procs::util::getEmail]"; return }
+			if {$v1 == "group"} { putserv "PRIVMSG NickServ :GROUP [zboe::procs::util::getGroupNick] [zboe::procs::util::getPass]"; return }
 			if {$v1 == "nsauth"} {
-				putserv "PRIVMSG NickServ :ID [zboe::util::getPass]";
+				putserv "PRIVMSG NickServ :ID [zboe::procs::util::getPass]";
 				putserv "PRIVMSG $chan :Authed to NickServ";
 				return;
 			}
 		}
 		proc version {nick uhost hand chan text} {
-			putserv "PRIVMSG $chan :zboe -> version-[zboe::util::getVersion] build [zboe::util::getBuild]"
-			putserv "PRIVMSG $chan :zboe -> release: [zboe::util::getRelease]"
+			putserv "PRIVMSG $chan :zboe -> version-[zboe::procs::util::getVersion] build [zboe::procs::util::getBuild]"
+			putserv "PRIVMSG $chan :zboe -> release: [zboe::procs::util::getRelease]"
 			return
 		}
 		proc register {nick uhost hand chan text} {
 			if {[validuser $hand] == "1"} { putserv "PRIVMSG $chan :Sorry $nick, but you're already registered. :)"; return }
 			if {[adduser $hand $uhost] == "1"} {
-				putserv "PRIVMSG [zboe::util::homechan] :*** Introduced user - $nick / $uhost"
+				putserv "PRIVMSG [zboe::procs::util::homechan] :*** Introduced user - $nick / $uhost"
 				putlog "*** Introduced to user - $nick / $uhost"
 				putserv "PRIVMSG $chan :Congradulations, $nick! you are now in my system! yay :)"
 				} else { putserv "PRIVMSG $chan :Addition failed." }
