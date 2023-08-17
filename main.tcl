@@ -5,8 +5,8 @@
 # ### --------------------------- ##################
 # ### Version: 0.5                ##################
 # ##################################################
-if {[catch {source scripts/zbot/zboe-settings.tcl} err]} {
-	putlog "Error: Could not load 'scripts/zbot/zboe-settings.tcl' file.";
+if {[catch {source scripts/zboe/zboe-settings.tcl} err]} {
+	putlog "Error: Could not load 'scripts/zboe/zboe-settings.tcl' file.";
 }
 
 namespace eval zboe {
