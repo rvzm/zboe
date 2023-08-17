@@ -10,7 +10,7 @@ namespace eval zboe {
 			variable homechan "#fuknz"
 		}
 		namespace eval hunt {
-			variable trigger "15"
+			variable trigger "12"
 			variable accuracy "70"
 			variable time "5"
 			variable multiz "no"
