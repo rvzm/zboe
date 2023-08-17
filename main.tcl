@@ -67,7 +67,7 @@ namespace eval zboe {
 				}
 				if {$v2 == "restart"} {
 					zboe::procs::zhunt::stophunting;
-					puthelp "PRIVMSG $chan :o.0.O.0.o Restarting the hunt... o.0.O.0.o";'
+					puthelp "PRIVMSG $chan :o.0.O.0.o Restarting the hunt... o.0.O.0.o";
 					zboe::procs::zhunt::starthunting;
 					return
 				}
