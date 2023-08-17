@@ -78,6 +78,15 @@ namespace eval zboe {
 					zboe::procs::zhunt::starthunting;
 					return
 				}
+				if {$v2 == "check"} {
+					set zha "[zboe::procs::util::read_db zhunt.activehunt]"
+					if {$zha == "yes"} {
+						puthelp "PRIVMSG $chan :o.0.O.0.o Zombies about. Putting them away.";
+						zboe::procs::util::write_db "zhunt.activehunt" "no";
+						zboe::procs::zhunt::stophunting;
+						return
+					}
+				}
 			}
 		}
 		proc zcontrol {nick uhost hand chan text} {
