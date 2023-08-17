@@ -208,7 +208,7 @@ namespace eval zboe {
 				set zschk "[zboe::procs::util::read_db zhunt.activehunt]"
 				if {$zschk == "yes"} {
 					set zpacc ${zboe::settings::hunt::accuracy}
-					set zpchk "[rand 15]"
+					set zpchk "[rand 99]"
 					if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| shoot acc: $zpacc check: $zpchk "; }
 					if {$zpchk <= $zpacc} {
 						puthelp "PRIVMSG $chan :o.0.O.0.o ayyy $nick hit the zombie!! They get 1xp"
