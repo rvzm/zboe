@@ -1,9 +1,10 @@
 #  zboe 0.1 by rvzm
-## zombie  hunting game for eggdrop
+ zombie  hunting game for eggdrop
 
-# clone into eggdrop scripts/ folder
-# add "source scripts/zboe/main.tcl" to your conf
-# edit scripts/zboe/zboe-settings.tcl to your liking
+# INSTALL
+ clone into eggdrop scripts/ folder
+ add "source scripts/zboe/main.tcl" to your conf
+ edit scripts/zboe/zboe-settings.tcl to your liking
 
 # SETTINGS 
  pugtrig - public trigger character. EXAMPLE: set to @ to use @shoot, or ^ to use ^shoot, etc
