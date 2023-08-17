@@ -202,12 +202,22 @@ namespace eval zboe {
 				}
 			}
 			proc reload {nick uhost hand chan text} {
-				
+				set zpam "[zboe::procs::util::read_db zhunt.$nick.ammo]"
+				if {$zpam >= 1} { puthelp "PRIVMSG $chan :errr! your clip isnt empty!"; return }
+				zboe::procs::util::write_db "zhunt.$nick.ammo" "6"
+				puthelp "PRIVMSG $chan :o.0.O.0.o Reloaded bitch!";
+				return;
 			}
 			proc shoot {nick uhost hand chan text} {
 				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| shoot command sent $nick $chan"; }
 				set zschk "[zboe::procs::util::read_db zhunt.activehunt]"
 				if {$zschk == "yes"} {
+					set zpam "[zboe::procs::util::read_db zhunt.$nick.ammo]"
+					if {$zpam == "0"} {
+						puthelp "PRIVMSG $chan :o.0.O.0.o errr! you need to reload dipshit!";
+						return
+					}
+					incr zpam -1
 					set zpacc ${zboe::settings::hunt::accuracy}
 					set zpchk "[rand 99]"
 					if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| shoot acc: $zpacc check: $zpchk "; }
@@ -220,7 +230,7 @@ namespace eval zboe {
 						zboe::procs::util::write_db "zhunt.activehunt" "no";
 						return
 					}
-					puthelp "PRIVMSG $chan :o.0.O.0.o oops, you fuckin missed gaylord";
+					puthelp "PRIVMSG $chan :o.0.O.0.o oops, you fuckin missed gaylord |$zpam/6|";
 					return
 				}
 				puthelp "PRIVMSG $chan :o.0.O.0.o there isnt a fuckin zombie gaylord";
