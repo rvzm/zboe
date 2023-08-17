@@ -56,7 +56,7 @@ namespace eval zboe {
 					set zha "[zboe::procs::util::read_db zhunt.activehunt]"
 					if {$zha == "yes"} {
 						zboe::procs::zhunt::stophunting;
-						puthelp "PRIVMSG $chan :o.0.O.0.o Stopping the hunt... o.0.O.0.o";'
+						puthelp "PRIVMSG $chan :o.0.O.0.o Stopping the hunt... o.0.O.0.o";
 						return;
 					}
 					if {$zha == "no"} {
@@ -176,7 +176,7 @@ namespace eval zboe {
 				if {$zha == "yes"} {
 					putcmdlog "*** zboe|debug| zcheck - halting, zombie still loose"
 					if {${zboe::settings::hunt::multiz} == "yes"} { 
-						
+						incr zcaz
 					}
 					if {${zboe::settings::hunt::roast} == "yes"} { puthelp "PRIVMSG $chan :o.0.O.0.o There would've been another zombie, but y'all havent hit this one yet."; }
 					return
@@ -185,6 +185,7 @@ namespace eval zboe {
 				if {$tchk <= ${zboe::settings::hunt::trigger}} {
 					if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| DER BE ZOMBIES"; }
 					puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Spotted! Shoot that fucker!";
+					if {[catch {[zboe::procs::util::read_db "zhunt.zombies"]} err]} { zboe::procs::util::write_db "zhunt.zombies" "1"; }
 					zboe::procs::util::write_db "zhunt.activehunt" "yes";
 					return
 				}
@@ -210,29 +211,35 @@ namespace eval zboe {
 			proc shoot {nick uhost hand chan text} {
 				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| shoot command sent $nick $chan"; }
 				set zschk "[zboe::procs::util::read_db zhunt.activehunt]"
+				set zaz "[zboe::procs::util::read_db zhunt.zombies]"
+				set zpam "[zboe::procs::util::read_db zhunt.$nick.ammo]"
 				if {$zschk == "yes"} {
-					set zpam "[zboe::procs::util::read_db zhunt.$nick.ammo]"
-					if {$zpam == "0"} {
-						puthelp "PRIVMSG $chan :o.0.O.0.o errr! you need to reload dipshit!";
+					if {$zaz >= "1"} {
+						if {$zpam == "0"} {
+							puthelp "PRIVMSG $chan :o.0.O.0.o errr! you need to reload dipshit!";
+							return
+						}
+						incr zpam -1
+						set zpacc ${zboe::settings::hunt::accuracy}
+						set zpchk "[rand 99]"
+						zboe::procs::util::write_db "zhunt.$nick.ammo" $zpam
+						if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| shoot acc: $zpacc check: $zpchk "; }
+						if {$zpchk <= $zpacc} {
+							puthelp "PRIVMSG $chan :o.0.O.0.o ayyy $nick hit the zombie!! They get 1xp"
+							set zpf zhunt.$nick.xp
+							set zpx "[zboe::procs::util::read_db $zpf]"
+							incr zaz -1
+							zboe::procs::util::write_db "zhunt.$nick.xp" $zpx
+							zboe::procs::util::write_db "zhunt.zombies" $zaz
+							return
+						}
+						puthelp "PRIVMSG $chan :o.0.O.0.o oops, you fuckin missed gaylord |$zpam/6|";
 						return
 					}
-					incr zpam -1
-					set zpacc ${zboe::settings::hunt::accuracy}
-					set zpchk "[rand 99]"
-					if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| shoot acc: $zpacc check: $zpchk "; }
-					if {$zpchk <= $zpacc} {
-						puthelp "PRIVMSG $chan :o.0.O.0.o ayyy $nick hit the zombie!! They get 1xp"
-						set zpf zhunt.$nick.xp
-						set zpx "[zboe::procs::util::read_db $zpf]"
-						incr zpx
-						zboe::procs::util::write_db "zhunt.$nick.xp" $zpx
-						zboe::procs::util::write_db "zhunt.activehunt" "no";
-						return
-					}
-					puthelp "PRIVMSG $chan :o.0.O.0.o oops, you fuckin missed gaylord |$zpam/6|";
-					return
+					puthelp "PRIVMSG $chan :o.0.O.0.o there isnt a fuckin zombie gaylord";
+					return;
 				}
-				puthelp "PRIVMSG $chan :o.0.O.0.o there isnt a fuckin zombie gaylord";
+				puthelp "PRIVMSG $chan :o.0.O.0.o there isnt an active hunt gaylord";
 				return;
 			}
 			proc shop {nick uhost hand chan text} {
