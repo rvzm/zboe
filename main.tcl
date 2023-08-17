@@ -19,15 +19,8 @@ namespace eval zboe {
 		bind pub - ${zboe::settings::gen::pubtrig}shop zboe::procs::zhunt::shop
 		bind pub - ${zboe::settings::gen::pubtrig}reload zboe::procs::zhunt::reload
 		bind pub - ${zboe::settings::gen::pubtrig}zstats zboe::procs::zhunt::stats
-		# Friendly commands
-		bind pub f ${zboe::settings::gen::pubtrig}uptime zboe::procs::uptime
-		bind pub f ${zboe::settings::gen::pubtrig}status zboe::procs::status
 		# Owner Commands
 		bind pub m ${zboe::settings::gen::controller} zboe::procs::control
-		bind pub m ${zboe::settings::gen::pubtrig}exec zboe::procs::exec
-		# dccts Commands
-		bind pub - ${zboe::settings::gen::pubtrig}dccts zboe::dccts::pubm
-		bind dcc - dccts zboe::dccts::go
 		# Autos
 		bind join - * zboe::procs::zchampcheck
 	}
