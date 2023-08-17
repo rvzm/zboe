@@ -14,7 +14,7 @@ namespace eval zboe {
 			# hunt trigger, higher means more often, max of 15
 			variable trigger "15"
 			variable accuracy "7"
-			variable time "1"
+			variable time "5"
 			variable multiz "no"
 			variable roast "yes"
 		}
