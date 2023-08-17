@@ -53,7 +53,6 @@ namespace eval zboe {
 					}
 				}
 				if {$v2 == "stop"} {
-					if {[catch {[zboe::procs::util::read_db "zhunt.activehunt"]} err]} { zboe::procs::util::write_db "zhunt.activehunt" "no"; }
 					set zha "[zboe::procs::util::read_db zhunt.activehunt]"
 					if {$zha == "yes"} {
 						zboe::procs::zhunt::stophunting;
