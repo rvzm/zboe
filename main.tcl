@@ -161,12 +161,10 @@ namespace eval zboe {
 			proc starthunting {} {
 				set chan ${zboe::settings::gen::homechan}
 				timer ${zboe::settings::hunt::time} zboe::procs::zhunt::zcheck 0 zhunttimer
-				return
 			}
 			proc stophunting {} {
 				set chan ${zboe::settings::gen::homechan}
 				killtimer zhunttimer
-				return
 			}
 			proc zcheck {} {
 				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| zombie check - rolling encounter"; }
