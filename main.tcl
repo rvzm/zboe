@@ -130,6 +130,12 @@ namespace eval zboe {
 				puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Check|| Active: $zcah | Zombies: $zcz | Your Level: $zcxl| Your Ammo/Clips: $zcam/zccl | Your XP: $zcxp | Horde Tokens: $zcht";
 				return
 			}
+			if {$v1 == "zs"} {
+				if {[file exists "scripts/zboe/zhunt.activehunt"] == 0} { zboe::util::write_db "zhunt.activehunt" "no"; }
+				if {[file exists "scripts/zboe/zhunt.zombies"] == 0} { zboe::util::write_db "zhunt.zombies" "0"; }
+				if {[file exists "scripts/zboe/zhunt.horde"] == 0} { zboe::util::write_db "zhunt.horde" "no"; }
+				puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Start Initialized. Hunt now available.";
+				return
 			}
 		}
 		proc version {nick uhost hand chan text} {
@@ -154,6 +160,7 @@ namespace eval zboe {
 						zboe::util::write_db "zhunt.activehunt" "yes";
 						zboe::util::write_db "zhunt.zombies" "0";
 						zboe::procs::zhunt::starthunting;
+						if {[file exists "scripts/zboe/zhunt.horde"] == 0} { zboe::util::write_db "zhunt.horde" "no"; }
 						puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Starting... o.0.O.0.o";
 						zboe::procs::zhunt::zcheck;
 						return
@@ -209,6 +216,7 @@ namespace eval zboe {
 							return
 						}
 						puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * Multiple zombies now infesting the area. | Zombies: $znum ";
+						if {[file exists "scripts/zboe/zhunt.horde"] == 0} { zboe::util::write_db "zhunt.horde" "no"; }
 						zboe::util::write_db "zhunt.horde" "yes";
 					}
 					if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| DER BE ZOMBIES"; }
