@@ -15,6 +15,7 @@ namespace eval zboe {
 			variable time "5"
 			variable multiz "no"
 			variable roast "no"
+			variable startonjoin "yes"
 		}
 		namespace eval flags {
 			setudef flag zbot
