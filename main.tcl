@@ -125,8 +125,11 @@ namespace eval zboe {
 				set zcam "[zboe::util::read_db zhunt.$nick.ammo]";
 				set zcxp "[zboe::util::read_db zhunt.$nick.xp]";
 				set zccl "[zboe::util::read_db zhunt.$nick.clips]";
-				puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Check|| Active: $zcah | Zombies: $zcz | Your Ammo: $zcam | Your XP: $zcxp";
-				return;
+				set zcht "[zboe::util::read_db zhunt.$nick.htok]";
+				set zcxl "[zboe::util::read_db zhunt.$nick.level]";
+				puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Check|| Active: $zcah | Zombies: $zcz | Your Level: $zcxl| Your Ammo/Clips: $zcam/zccl | Your XP: $zcxp | Horde Tokens: $zcht";
+				return
+			}
 			}
 		}
 		proc version {nick uhost hand chan text} {
@@ -164,6 +167,8 @@ namespace eval zboe {
 				zboe::util::write_db "zhunt.$nick.ammo" "6";
 				zboe::util::write_db "zhunt.$nick.clips" "3";
 				zboe::util::write_db "zhunt.$nick.jam" "no";
+				zboe::util::write_db "zhunt.$nick.htok" "0";
+				zboe::util::write_db "zhunt.$nick.level" "1";
 				}
 			putcmdlog "*** zboe|users| zjoin: $nick | initialized";
 		}
@@ -228,13 +233,19 @@ namespace eval zboe {
 				set zcam "[zboe::util::read_db zhunt.$zget.ammo]";
 				set zcxp "[zboe::util::read_db zhunt.$zget.xp]";
 				set zccl "[zboe::util::read_db zhunt.$zget.clips]";
-				puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Check|| Active: $zcah | Zombies: $zcz | $zcol Ammo: $zcam | $zcol XP: $zcxp";
+				set zcht "[zboe::util::read_db zhunt.$zget.htok]";
+				set zcxl "[zboe::util::read_db zhunt.$zget.level]";
+				puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Check|| Active: $zcah | Zombies: $zcz | $zcol Level: $zcxl | $zcol Ammo/Clips: $zcam/$zccl | $zcol XP: $zcxp | Horde Tokens: $zcht";
 			}
 			proc reload {nick uhost hand chan text} {
 				set zpam "[zboe::util::read_db zhunt.$nick.ammo]"
+				set zrl "[zboe::util::read_db zhunt.$nick.clips]";
 				if {$zpam >= 1} { puthelp "PRIVMSG $chan :errr! your clip isnt empty!"; return }
+				if {$zrl == 0} { puthelp "PRIVMSG $chan :errr! You have no clips!"; return }
 				zboe::util::write_db "zhunt.$nick.ammo" "6"
-				puthelp "PRIVMSG $chan :o.0.O.0.o Reloaded bitch!";
+				incr zrl -1
+				zboe::util::write_db "zhunt.$nick.clips" "$zrl"
+				puthelp "PRIVMSG $chan :o.0.O.0.o Reloaded bitch! (Clips left: $zrl)";
 				return;
 			}
 			proc shoot {nick uhost hand chan text} {
@@ -248,6 +259,8 @@ namespace eval zboe {
 						zboe::util::write_db "zhunt.$nick.ammo" "6";
 						zboe::util::write_db "zhunt.$nick.clips" "3";
 						zboe::util::write_db "zhunt.$nick.jam" "no";
+						zboe::util::write_db "zhunt.$nick.htok" "0";
+						zboe::util::write_db "zhunt.$nick.level" "1";
 						putcmdlog "*** zboe|users| shooting: $nick | initialized";
 					}
 					set zpam "[zboe::util::read_db zhunt.$nick.ammo]"
@@ -274,7 +287,10 @@ namespace eval zboe {
 								if {$zaz == "0"} {
 									if {[zboe::util::read_db zhunt.horde] == "yes"} {
 										puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * * * HORDE ELIMINATED (+5 XP) * * *";
+										set zsht "[zboe::util::read_db zhunt.$nick.htok]"
 										incr zpx "5"
+										incr zsht
+										zboe::util::write_db "zhunt.$nick.htok" $zsht
 										zboe::util::write_db "zhunt.$nick.xp" $zpx
 										zboe::util::write_db "zhunt.horde" "no"
 									}
@@ -297,6 +313,23 @@ namespace eval zboe {
 			proc shop {nick uhost hand chan text} {
 				set v1 [lindex [split $text] 0]
 				set v2 [lindex [split $text] 1]
+				if {$v1 == ""} { puthelp "PRIVMSG $chan :o.0.O.0.o zboe Shop - use ${zboe::settings::gen::pubtrig}shop <item number>"; puthelp "PRIVMSG $chan :Current Items: (1) Clip"; return }
+				if {[file exists "scripts/zboe/zhunt.$nick.ammo"] == 0} {
+					putcmdlog "*** zboe|users| initializing $nick";
+					zboe::util::write_db "zhunt.$nick.xp" "0";
+					zboe::util::write_db "zhunt.$nick.ammo" "6";
+					zboe::util::write_db "zhunt.$nick.clips" "3";
+					zboe::util::write_db "zhunt.$nick.jam" "no";
+					zboe::util::write_db "zhunt.$nick.htok" "0";
+					zboe::util::write_db "zhunt.$nick.level" "1";
+					putcmdlog "*** zboe|users| shooting: $nick | initialized";
+				}
+				if {$v1 == "1"} {
+					set zshop "[zboe::util::read_db zhunt.$nick.clips]";
+					incr zshop
+					zboe::util::write_db "zhunt.$nick.clips" "$zshop";
+					puthelp "PRIVMSG $chan :o.0.O.0.o You purchased a clip, you now have $zshop clips";
+				}
 			}
 		}
 	}
