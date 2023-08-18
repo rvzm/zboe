@@ -72,7 +72,7 @@ namespace eval zboe {
 					if {$zha == "yes"} {
 						puthelp "PRIVMSG $chan :o.0.O.0.o Zombies about. Putting them away.";
 						zboe::util::write_db "zhunt.activehunt" "no";
-						zboe::util::write_db "zhunt.zombies" "0"
+						zboe::util::write_db "zhunt.zombies" "0";
 						zboe::procs::zhunt::stophunting;
 						return
 					}
