@@ -207,14 +207,17 @@ namespace eval zboe {
 				set znum "[zboe::procs::util::read_db zhunt.zombies]"
 				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| zcheck active: $zha | zombies: $znum"; }
 				if {$tchk <= ${zboe::settings::hunt::trigger}} {
-					if {$znum >= "1"} {
+					incr znum
+					if {$znum >= "2"} {
 						if {${zboe::settings::hunt::multiz} == "no"} { 
 							putcmdlog "*** zboe|debug| zcheck - halting, zombie still loose"
 							if {${zboe::settings::hunt::roast} == "yes"} { puthelp "PRIVMSG $chan :o.0.O.0.o There would've been another zombie, but y'all havent hit this one yet."; }
+							incr znum -1
 							return
 						}
+						puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * Multiple zombies now infesting the area. | Zombies: $znum ";
+						zboe::procs::util::write_db "zhunt.horde" "yes";
 					}
-					incr znum
 					if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| DER BE ZOMBIES"; }
 					puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Spotted! Shoot that fucker!";
 					if {[file exists "zhunt.zombies"] == 0} { zboe::procs::util::write_db "zhunt.zombies" "1"; }
@@ -276,6 +279,18 @@ namespace eval zboe {
 							incr zaz -1
 							zboe::procs::util::write_db "zhunt.$nick.xp" $zpx
 							zboe::procs::util::write_db "zhunt.zombies" $zaz
+							if {${zboe::settings::hunt::multiz} == "yes"} {
+								if {$zaz == "0"} {
+									if {[zboe::procs::util::read_db zhunt.horde] == "yes"} {
+										puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * * * HORDE ELIMINATED (+5 XP) * * *";
+										incr zpx "5"
+										zboe::procs::util::write_db "zhunt.$nick.xp" $zpx
+									}
+									return; 
+								}
+								if {$zaz == "1"} { puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * * * LAST ZOMBIE * * *"; return; }
+								puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * Zombies Remaining: $zaz";
+							}
 							return
 						}
 						puthelp "PRIVMSG $chan :o.0.O.0.o oops, you fuckin missed gaylord |$zpam/6|";
