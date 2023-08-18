@@ -22,7 +22,7 @@ namespace eval zboe {
 		# Owner Commands
 		bind pub m ${zboe::settings::gen::controller} zboe::procs::control
 		# Autos
-		bind join - * zboe::procs::zchampcheck
+		bind join - * zboe::procs::zcheck
 	}
 	namespace eval procs {
 		# Main Command Procs
@@ -155,6 +155,16 @@ namespace eval zboe {
 				putserv "PRIVMSG $chan :Congradulations, $nick! you are now in my system! yay :)"
 				} else { putserv "PRIVMSG $chan :Addition failed." }
 			return
+		}
+		proc zcheck {nick uhost hand chan} {
+			if {[file exists "zhunt.$nick.xp"] == 0} {
+				putcmdlog "*** zboe|users| initializing $nick";
+				zboe::procs::util::write_db "zhunt.$nick.xp" "0";
+				zboe::procs::util::write_db "zhunt.$nick.ammo" "6";
+				zboe::procs::util::write_db "zhunt.$nick.clips" "3";
+				zboe::procs::util::write_db "zhunt.$nick.jam" "no";
+				}
+			putcmdlog "***zboe|users| zjoin $nick | initialized";
 		}
 		# Utility procs
 		namespace eval zhunt {
