@@ -381,7 +381,7 @@ namespace eval zboe {
 		zboe::util::write_db "zhunt.$nick.level" "1";
 		zboe::util::write_db "zhunt.$nick.maxammo" "6";
 		zboe::util::write_db "zhunt.$nick.maxclip" "3";
-		zboe::util::write_db "zhunt.$nick.maxacc" "45";
+		zboe::util::write_db "zhunt.$nick.maxacc" "55";
 		putcmdlog "*** zboe|users| zjoin: $nick | initialized";
 		}
 		proc init.zboe {} {
