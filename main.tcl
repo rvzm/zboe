@@ -177,21 +177,22 @@ namespace eval zboe {
 				set tchk "[rand 15]"
 				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| zcheck $tchk"; }
 				set zha "[zboe::procs::util::read_db zhunt.activehunt]"
-				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| zcheck active $zha"; }
-				if {$zha == "yes"} {
-					if {${zboe::settings::hunt::multiz} == "no"} { 
-						putcmdlog "*** zboe|debug| zcheck - halting, zombie still loose"
-						if {${zboe::settings::hunt::roast} == "yes"} { puthelp "PRIVMSG $chan :o.0.O.0.o There would've been another zombie, but y'all havent hit this one yet."; }
-						return
+				set znum "[zboe::procs::util::read_db zhunt.zombies]"
+				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| zcheck active: $zha | zombies: $znum"; }
+				if {$tchk <= ${zboe::settings::hunt::trigger}} {
+					if {$znum >= "1"} {
+						if {${zboe::settings::hunt::multiz} == "no"} { 
+							putcmdlog "*** zboe|debug| zcheck - halting, zombie still loose"
+							if {${zboe::settings::hunt::roast} == "yes"} { puthelp "PRIVMSG $chan :o.0.O.0.o There would've been another zombie, but y'all havent hit this one yet."; }
+							return
+						}
 					}
-					incr zcaz
-					if {$tchk <= ${zboe::settings::hunt::trigger}} {
-						if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| DER BE ZOMBIES"; }
-						puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Spotted! Shoot that fucker!";
-						if {[file exists "zhunt.zombies"] == 0} { zboe::procs::util::write_db "zhunt.zombies" "1"; }
-						zboe::procs::util::write_db "zhunt.activehunt" "yes";
-						return
-					}
+					incr znum
+					if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| DER BE ZOMBIES"; }
+					puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Spotted! Shoot that fucker!";
+					if {[file exists "zhunt.zombies"] == 0} { zboe::procs::util::write_db "zhunt.zombies" "1"; }
+					zboe::procs::util::write_db "zhunt.zombies" $znum;
+					return
 				}
 				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| no zombie"; }
 			}
@@ -233,6 +234,7 @@ namespace eval zboe {
 							puthelp "PRIVMSG $chan :o.0.O.0.o ayyy $nick hit the zombie!! They get 1xp"
 							set zpf zhunt.$nick.xp
 							set zpx "[zboe::procs::util::read_db $zpf]"
+							incr zpx
 							incr zaz -1
 							zboe::procs::util::write_db "zhunt.$nick.xp" $zpx
 							zboe::procs::util::write_db "zhunt.zombies" $zaz
