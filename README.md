@@ -25,4 +25,5 @@
  multiz - have more than one zombie at a time? [NOT DONE]
 
  roast - roast players for not hitting the zombie, when mutliz is disabled and a new encounter would spawn a zombie
- 
+
+startonjoin - start an active hunt session when zboe joins the homechan 
