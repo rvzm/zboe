@@ -165,16 +165,10 @@ namespace eval zboe {
 				}
 				return
 			}
-			if {[file exists "zhunt.$nick.xp"] == 0} {
-				putcmdlog "*** zboe|users| initializing $nick";
-				zboe::util::write_db "zhunt.$nick.xp" "0";
-				zboe::util::write_db "zhunt.$nick.ammo" "6";
-				zboe::util::write_db "zhunt.$nick.clips" "3";
-				zboe::util::write_db "zhunt.$nick.jam" "no";
-				zboe::util::write_db "zhunt.$nick.htok" "0";
-				zboe::util::write_db "zhunt.$nick.level" "1";
-				}
-			putcmdlog "*** zboe|users| zjoin: $nick | initialized";
+			if {$chan == ${zboe::settings::gen::homechan}} {
+				if {[file exists "zhunt.$nick.xp"] == 0} { zboe::util::init.nick $nick; }
+				if {[zboe::util::read_db "zhunt.activehunt"] == "yes"} { puthelp "PRIVMSG $chan :o.0.O.0.o. There is currently an active hunt! there are [zboe::util::read_db "zhunt.zombies"] zombies around currently."; }
+			}
 		}
 		namespace eval zhunt {
 			proc starthunting {} {
