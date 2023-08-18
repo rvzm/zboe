@@ -170,10 +170,14 @@ namespace eval zboe {
 		namespace eval zhunt {
 			proc starthunting {} {
 				set chan ${zboe::settings::gen::homechan}
+				zboe::procs::util::write_db "zhunt.activehunt" "yes"
+				zboe::procs::util::write_db "zhunt.zombies" "0"
 				timer ${zboe::settings::hunt::time} zboe::procs::zhunt::zcheck 0 zhunttimer
 			}
 			proc stophunting {} {
 				set chan ${zboe::settings::gen::homechan}
+				zboe::procs::util::write_db "zhunt.activehunt" "no"
+				zboe::procs::util::write_db "zhunt.zombies" "0"
 				killtimer zhunttimer
 			}
 			proc zcheck {} {
@@ -221,8 +225,9 @@ namespace eval zboe {
 				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| shoot command sent $nick $chan"; }
 				set zschk "[zboe::procs::util::read_db zhunt.activehunt]"
 				set zaz "[zboe::procs::util::read_db zhunt.zombies]"
-				set zpam "[zboe::procs::util::read_db zhunt.$nick.ammo]"
 				if {$zschk == "yes"} {
+					if {[file exists "zhunt.$nick.xp"] == 0} { puthelp "PRIVMSG $chan :o.0.O.0.o err, you haven't been initialized. use '${zboe::settings::gen::pubtrig}zboe hunt zgo' to register!"; return; }
+					set zpam "[zboe::procs::util::read_db zhunt.$nick.ammo]"
 					if {$zaz >= "1"} {
 						if {$zpam == "0"} {
 							puthelp "PRIVMSG $chan :o.0.O.0.o errr! you need to reload dipshit!";
