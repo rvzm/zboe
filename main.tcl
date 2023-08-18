@@ -275,7 +275,7 @@ namespace eval zboe {
 							return
 						}
 						incr zpam -1
-						set zpacc ${zboe::settings::hunt::accuracy}
+						set zpacc "[zboe::util::read_db zhunt.$nick.maxacc]"
 						set zpchk "[rand 99]"
 						set zpf zhunt.$nick.xp
 						set zpx "[zboe::util::read_db $zpf]"

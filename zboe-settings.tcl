@@ -11,7 +11,6 @@ namespace eval zboe {
 		}
 		namespace eval hunt {
 			variable trigger "12"
-			variable accuracy "70"
 			variable time "3"
 			variable multiz "no"
 			variable maxhorde "5"
