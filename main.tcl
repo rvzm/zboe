@@ -181,7 +181,7 @@ namespace eval zboe {
 				zboe::procs::util::write_db "zhunt.$nick.clips" "3";
 				zboe::procs::util::write_db "zhunt.$nick.jam" "no";
 				}
-			putcmdlog "***zboe|users| zjoin $nick | initialized";
+			putcmdlog "*** zboe|users| zjoin: $nick | initialized";
 		}
 		# Utility procs
 		namespace eval zhunt {
@@ -286,25 +286,22 @@ namespace eval zboe {
 		}
 		namespace eval util {
 			# write to *.db files
-			proc write_db { w_db w_info } {
+			proc write_db {w_db w_info} {
+				if {[file exists $w_db] == 0} {
+					set crtdb [open $w_db a+]
+					puts $crtdb "$w_info"
+					close $crtdb
+				}
 				set fs_write [open $w_db w]
 				puts $fs_write "$w_info"
 				close $fs_write
 			}
 			# read from *.db files
-			proc read_db { r_db } {
+			proc read_db {r_db} {
 				set fs_open [open $r_db r]
 				gets $fs_open db_out
 				close $fs_open
 				return $db_out
-			}
-			# create *.db files, servers names files
-			proc create_db { bdb db_info } {
-				if {[file exists $bdb] == 0} {
-					set crtdb [open $bdb a+]
-					puts $crtdb "$db_info"
-					close $crtdb
-				}
 			}
 			proc getVersion {} {
 				global zboe::settings::version
