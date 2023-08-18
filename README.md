@@ -22,8 +22,10 @@
 
  time - how often, in minutes, the system should "roll for an enounter"
 
- multiz - have more than one zombie at a time? [NOT DONE]
+ multiz - have more than one zombie at a time? [added in build 081812]
 
  roast - roast players for not hitting the zombie, when mutliz is disabled and a new encounter would spawn a zombie
 
-startonjoin - start an active hunt session when zboe joins the homechan 
+ startonjoin - start an active hunt session when zboe joins the homechan 
+ 
+ maxhorde - maximum horde size for multi-zombie mode
