@@ -31,15 +31,15 @@ namespace eval zboe {
 			set v1 [lindex [split $text] 0]
 			if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| main command var 1 set"; }
 			set v2 [lindex [split $text] 1]
-			if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| main command var 1 set"; }
+			if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| main command var 2 set"; }
 			set v3 [lindex [split $text] 2]
-			if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| main command var 1 set"; }
+			if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| main command var 3 set"; }
 			if {$v1 == ""} {
 				if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| main command recieved no input, informing chan and halting"; }
 				puthelp "PRIVMSG $chan :\037ERROR\037: Incorrect Parameters. \037SYNTAX\037: [zboe::procs::util::getTrigger]zboe help"; return
 			}
 			if {$v1 == "hunt"} {
-				if {${zboe::settings::debug} == "1"} { putcmdlog "*** zboe|debug| main command recieved control for hunt - $v2"; }
+				if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| main command recieved control for hunt - $v2"; }
 				if {$v2 == "start"} {
 					set zha "[zboe::procs::util::read_db zhunt.activehunt]"
 					if {$zha == "no"} {
@@ -95,9 +95,9 @@ namespace eval zboe {
 			set v1 [lindex [split $text] 0]
 			if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| zombie interact command var 1 set"; }
 			set v2 [lindex [split $text] 1]
-			if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| zombie interact command var 1 set"; }
+			if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| zombie interact command var 2 set"; }
 			set v3 [lindex [split $text] 2]
-			if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| zombie interact command var 1 set"; }
+			if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| zombie interact command var 3 set"; }
 			if {$v1 == ""} {
 				if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| zombie interact command recieved no input, informing chan and halting"; }
 				puthelp "PRIVMSG $chan :\037ERROR\037: Incorrect Parameters. \037SYNTAX\037: [zboe::procs::util::getTrigger]zboe help"; return
