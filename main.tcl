@@ -19,6 +19,7 @@ namespace eval zboe {
 		bind pub - ${zboe::settings::gen::pubtrig}shop zboe::procs::zhunt::shop
 		bind pub - ${zboe::settings::gen::pubtrig}reload zboe::procs::zhunt::reload
 		bind pub - ${zboe::settings::gen::pubtrig}zstats zboe::procs::zhunt::stats
+		bind pub - ${zboe::settings::gen::pubtrig}stats zboe::procs::zhunt::stats
 		# Owner Commands
 		bind pub m ${zboe::settings::gen::controller} zboe::procs::control
 		# Autos
