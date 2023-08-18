@@ -225,17 +225,17 @@ namespace eval zboe {
 			}
 			proc stats {nick uhost hand chan text} {
 				set v1 [lindex [split $text] 0]
-				if {$v1 == ""} {
-					set zpf "zhunt.$nick.xp"
-					set zpsx "[zboe::procs::util::read_db $zpf]"
-					puthelp "PRIVMSG $chan :o.0.O.0.o You have $zpsx xp!";
-					return
+				if {$v1 == ""} { set zget $nick; set zcol "Your"; }
+				if {$v1 != ""} {
+					if {[file exists zhunt.$v1.xp] == 0} { puthelp "PRIVMSG $chan :o.0.O.0.o $v1 hasn't started hutning yet."; return }
+					if {[file exists zhunt.$v1.xp] == 1} { set zget $v1; set zcol "$nick's" }
 				}
-				if {[file exists zhunt.$v1.xp] == 1} {
-					set zxfl "zhunt.$v1.xp"
-					set zxr "[zboe::procs::util::read_db $zxfl]";
-					puthelp "PRIVMSG $chan :o.0.O.0.o $v1 has $zxr xp!";
-				}
+				set zcz "[zboe::procs::util::read_db zhunt.zombies]";
+				set zcah "[zboe::procs::util::read_db zhunt.activehunt]";
+				set zcam "[zboe::procs::util::read_db zhunt.$zget.ammo]";
+				set zcxp "[zboe::procs::util::read_db zhunt.$zget.xp]";
+				set zccl "[zboe::procs::util::read_db zhunt.$zget.clips]";
+				puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Check|| Active: $zcah | Zombies: $zcz | $zcol Ammo: $zcam | $zcol XP: $zcxp";
 			}
 			proc reload {nick uhost hand chan text} {
 				set zpam "[zboe::procs::util::read_db zhunt.$nick.ammo]"
