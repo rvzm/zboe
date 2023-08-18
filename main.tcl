@@ -217,6 +217,11 @@ namespace eval zboe {
 					puthelp "PRIVMSG $chan :o.0.O.0.o You have $zpsx xp!";
 					return
 				}
+				if {[file exists zhunt.$v1.xp] == 1} {
+					set zxfl "zhunt.$v1.xp"
+					set zxr "[zboe::procs::util::read_db $zxfl]";
+					puthelp "PRIVMSG $chan :o.0.O.0.o $v1 has $zxr xp!";
+				}
 			}
 			proc reload {nick uhost hand chan text} {
 				set zpam "[zboe::procs::util::read_db zhunt.$nick.ammo]"
