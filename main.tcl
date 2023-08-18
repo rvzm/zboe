@@ -79,6 +79,8 @@ namespace eval zboe {
 						zboe::procs::zhunt::stophunting;
 						return
 					}
+					puthelp "PRIVMSG $chan :o.0.O.0.o No stray zombies";
+					return
 				}
 				if {$v2 == "zgo"} {
 					if {[file exists "zhunt.$nick.xp"] == 0} { zboe::procs::util::write_db "zhunt.$nick.xp" "0"; }
@@ -132,6 +134,7 @@ namespace eval zboe {
 			if {$v1 == "restart"} { restart; return }
 			if {$v1 == "die"} { die; return }
 			if {$v1 == "info"} { putserv "PRIVMSG $chan :zboe.tcl running version [zboe::procs::util::getVersion]"; return }
+			if {$v1 == "z"} { putserv "PRIVMSG $chan :o.0.O.0.o Rolling Encounter..."; zboe::procs::zhunt::zcheck; return }
 		}
 		proc version {nick uhost hand chan text} {
 			putserv "PRIVMSG $chan :zboe -> version-[zboe::procs::util::getVersion] build [zboe::procs::util::getBuild]"
