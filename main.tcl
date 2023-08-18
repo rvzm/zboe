@@ -115,12 +115,9 @@ namespace eval zboe {
 				if {$v2 == "restart"} { putserv "NOTICE $nick :zboe command 'restart' - restarts zboe bot"; return }
 				if {$v2 == "die"} { putserv "NOTICE $nick :zboe command 'die' - forces zboe bot to shut down"; return }
 				if {$v2 == "info"} { putserv "NOTICE $nick :zboe command 'info' - displays current version information to channel"; return }
-				if {$v2 == "register"} { putserv "NOTICE $nick :zboe command 'register' - registers zboe with the 'npass' and 'email' settings to nickserv"; return }
 				if {$v2 == "group"} { putserv "NOTICE $nick :zboe command 'group' - uses nickserv to group zboe with the nick provided in the 'gnick' setting"; return }
-				if {$v2 == "nsauth"} { putserv "NOTICE $nick :zboe command 'nsauth' - forces zboe to identify with nickserv using the 'npass' setting"; return }
 				if {$v2 == ""} {
 					putserv "NOTICE $nick :zboe controll commands - rehash restart die"
-					putserv "NOTICE $nick :zboe nickserv commands - nsauth group register"
 					return
 					}
 				putcmdlog "*** zboe controller $nick - help command error - no if statement triggered"
@@ -134,13 +131,6 @@ namespace eval zboe {
 			if {$v1 == "restart"} { restart; return }
 			if {$v1 == "die"} { die; return }
 			if {$v1 == "info"} { putserv "PRIVMSG $chan :zboe.tcl running version [zboe::procs::util::getVersion]"; return }
-			if {$v1 == "register"} { putserv "PRIVMSG NickServ :REGISTER [zboe::procs::util::getPass] [zboe::procs::util::getEmail]"; return }
-			if {$v1 == "group"} { putserv "PRIVMSG NickServ :GROUP [zboe::procs::util::getGroupNick] [zboe::procs::util::getPass]"; return }
-			if {$v1 == "nsauth"} {
-				putserv "PRIVMSG NickServ :ID [zboe::procs::util::getPass]";
-				putserv "PRIVMSG $chan :Authed to NickServ";
-				return;
-			}
 		}
 		proc version {nick uhost hand chan text} {
 			putserv "PRIVMSG $chan :zboe -> version-[zboe::procs::util::getVersion] build [zboe::procs::util::getBuild]"
