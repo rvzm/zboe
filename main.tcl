@@ -248,7 +248,14 @@ namespace eval zboe {
 				set zschk "[zboe::procs::util::read_db zhunt.activehunt]"
 				set zaz "[zboe::procs::util::read_db zhunt.zombies]"
 				if {$zschk == "yes"} {
-					if {[file exists "zhunt.$nick.xp"] == 0} { puthelp "PRIVMSG $chan :o.0.O.0.o err, you haven't been initialized. use '${zboe::settings::gen::pubtrig}zboe hunt zgo' to register!"; return; }
+					if {[file exists "zhunt.$nick.ammo"] == 0} {
+						putcmdlog "*** zboe|users| initializing $nick";
+						zboe::procs::util::write_db "zhunt.$nick.xp" "0";
+						zboe::procs::util::write_db "zhunt.$nick.ammo" "6";
+						zboe::procs::util::write_db "zhunt.$nick.clips" "3";
+						zboe::procs::util::write_db "zhunt.$nick.jam" "no";
+						putcmdlog "*** zboe|users| shooting: $nick | initialized";
+					}
 					set zpam "[zboe::procs::util::read_db zhunt.$nick.ammo]"
 					if {$zaz >= "1"} {
 						if {$zpam == "0"} {
