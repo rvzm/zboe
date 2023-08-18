@@ -13,7 +13,7 @@ namespace eval zboe {
 			variable trigger "12"
 			variable accuracy "70"
 			variable time "3"
-			variable multiz "yes"
+			variable multiz "no"
 			variable roast "no"
 			variable startonjoin "yes"
 		}
