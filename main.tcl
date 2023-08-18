@@ -252,16 +252,7 @@ namespace eval zboe {
 				set zschk "[zboe::util::read_db zhunt.activehunt]"
 				set zaz "[zboe::util::read_db zhunt.zombies]"
 				if {$zschk == "yes"} {
-					if {[file exists "scripts/zboe/zhunt.$nick.ammo"] == 0} {
-						putcmdlog "*** zboe|users| initializing $nick";
-						zboe::util::write_db "zhunt.$nick.xp" "0";
-						zboe::util::write_db "zhunt.$nick.ammo" "6";
-						zboe::util::write_db "zhunt.$nick.clips" "3";
-						zboe::util::write_db "zhunt.$nick.jam" "no";
-						zboe::util::write_db "zhunt.$nick.htok" "0";
-						zboe::util::write_db "zhunt.$nick.level" "1";
-						putcmdlog "*** zboe|users| shooting: $nick | initialized";
-					}
+					if {[file exists "scripts/zboe/zhunt.$nick.xp"] == 0} { zboe::util::init.nick $nick; }
 					set zpam "[zboe::util::read_db zhunt.$nick.ammo]"
 					if {$zaz >= "1"} {
 						if {$zpam == "0"} {
