@@ -1,9 +1,6 @@
 # ##################################################
 # ### zboe  - zombie hunting game ##################
-# ### with web assisted stats     ##################
 # ### Coded by rvzm               ##################
-# ### --------------------------- ##################
-# ### Version: 0.5                ##################
 # ##################################################
 if {[catch {source scripts/zboe/zboe-settings.tcl} err]} {
 	putlog "Error: Could not load 'scripts/zboe/zboe-settings.tcl' file.";
