@@ -80,10 +80,10 @@ namespace eval zboe {
 					}
 				}
 				if {$v2 == "zgo"} {
-					if {[catch {[zboe::procs::util::read_db "zhunt.$nick.xp"]} err]} { zboe::procs::util::write_db "zhunt.$nick.xp" "0"; }
-					if {[catch {[zboe::procs::util::read_db "zhunt.$nick.ammo"]} err]} { zboe::procs::util::write_db "zhunt.$nick.ammo" "6"; }
-					if {[catch {[zboe::procs::util::read_db "zhunt.$nick.clips"]} err]} { zboe::procs::util::write_db "zhunt.$nick.clips" "3"; }
-					if {[catch {[zboe::procs::util::read_db "zhunt.$nick.jam"]} err]} { zboe::procs::util::write_db "zhunt.$nick.jam" "no"; }
+					if {[file exists "zhunt.$nick.xp"] == 0} { zboe::procs::util::write_db "zhunt.$nick.xp" "0"; }
+					if {[file exists "zhunt.$nick.ammo"] == 0} { zboe::procs::util::write_db "zhunt.$nick.ammo" "6"; }
+					if {[file exists "zhunt.$nick.clips"] == 0} { zboe::procs::util::write_db "zhunt.$nick.clips" "3"; }
+					if {[file exists "zhunt.$nick.jam"] == 0} { zboe::procs::util::write_db "zhunt.$nick.jam" "no"; }
 					puthelp "PRIVMSG $chan :o.0.O.0.o. All set to hunt!";
 					return
 				}
