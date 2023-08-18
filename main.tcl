@@ -202,7 +202,7 @@ namespace eval zboe {
 							incr znum -1
 							return
 						}
-						if {$znum >= ${zboe::settings::hunt::maxhorde}} {
+						if {$znum > ${zboe::settings::hunt::maxhorde}} {
 							puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * New zombie trying to join the horde, but the max horde size has been reached!";
 							putcmdlog "*** zboe|debug| Zombie horde max reached";
 							set znum ${zboe::settings::hunt::maxhorde};
