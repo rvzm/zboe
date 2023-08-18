@@ -184,20 +184,19 @@ namespace eval zboe {
 				set zha "[zboe::procs::util::read_db zhunt.activehunt]"
 				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| zcheck active $zha"; }
 				if {$zha == "yes"} {
-					putcmdlog "*** zboe|debug| zcheck - halting, zombie still loose"
-					if {${zboe::settings::hunt::multiz} == "yes"} { 
-						incr zcaz
+					if {${zboe::settings::hunt::multiz} == "no"} { 
+						putcmdlog "*** zboe|debug| zcheck - halting, zombie still loose"
+						if {${zboe::settings::hunt::roast} == "yes"} { puthelp "PRIVMSG $chan :o.0.O.0.o There would've been another zombie, but y'all havent hit this one yet."; }
+						return
 					}
-					if {${zboe::settings::hunt::roast} == "yes"} { puthelp "PRIVMSG $chan :o.0.O.0.o There would've been another zombie, but y'all havent hit this one yet."; }
-					return
+					incr zcaz
+					if {$tchk <= ${zboe::settings::hunt::trigger}} {
+						if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| DER BE ZOMBIES"; }
+						puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Spotted! Shoot that fucker!";
+						if {[file exists "zhunt.zombies"] == 0} { zboe::procs::util::write_db "zhunt.zombies" "1"; }
+						zboe::procs::util::write_db "zhunt.activehunt" "yes";
+						return
 					}
-
-				if {$tchk <= ${zboe::settings::hunt::trigger}} {
-					if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| DER BE ZOMBIES"; }
-					puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Spotted! Shoot that fucker!";
-					if {[catch {[zboe::procs::util::read_db "zhunt.zombies"]} err]} { zboe::procs::util::write_db "zhunt.zombies" "1"; }
-					zboe::procs::util::write_db "zhunt.activehunt" "yes";
-					return
 				}
 				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| no zombie"; }
 			}
