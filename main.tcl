@@ -187,9 +187,9 @@ namespace eval zboe {
 				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| zcheck $tchk"; }
 				set zha "[zboe::util::read_db zhunt.activehunt]"
 				set znum "[zboe::util::read_db zhunt.zombies]"
-				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| zcheck active: $zha | zombies: $znum"; }
 				if {$tchk <= ${zboe::settings::hunt::trigger}} {
 					incr znum
+					if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| zcheck active: $zha | zombies: $znum"; }
 					if {$znum >= "2"} {
 						if {${zboe::settings::hunt::multiz} == "no"} { 
 							putcmdlog "*** zboe|debug| zcheck - halting, zombie still loose"
