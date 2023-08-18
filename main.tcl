@@ -201,12 +201,12 @@ namespace eval zboe {
 							return
 						}
 						if {$znum > ${zboe::settings::hunt::maxhorde}} {
-							puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * New zombie trying to join the horde, but the max horde size has been reached!";
+							if {${zboe::settings::hunt::roast} == "yes"} { puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * New zombie trying to join the horde, but the max horde size has been reached!"; }
 							putcmdlog "*** zboe|debug| Zombie horde max reached";
 							set znum ${zboe::settings::hunt::maxhorde};
 							return
 						}
-						puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * Multiple zombies now infesting the area. | Zombies: $znum ";
+						puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * Multiple zombies now infesting the area. | Zombies: $znum "
 						if {[file exists "scripts/zboe/zhunt.horde"] == 0} { zboe::util::write_db "zhunt.horde" "no"; }
 						zboe::util::write_db "zhunt.horde" "yes";
 					}
