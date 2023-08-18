@@ -37,6 +37,7 @@ namespace eval zboe {
 			}
 			if {$v1 == "hunt"} {
 				if {${zboe::settings::debug} == "2"} { putcmdlog "*** zboe|debug| main command recieved control for hunt - $v2"; }
+				if {[file exists "scripts/zboe/zhunt.activehunt"] == 0} { zboe::util::init.zboe; }
 				if {$v2 == "start"} {
 					set zha "[zboe::util::read_db zhunt.activehunt]"
 					if {$zha == "no"} {
@@ -227,6 +228,7 @@ namespace eval zboe {
 					set zcol "$v1's";
 				}
 				if {$v1 == ""} { set zget $nick; set zcol "Your"; }
+				if {[file exists "scripts/zboe/zhunt.$nick.xp"] == 0} { zboe::util::init.nick $nick; }
 				set zcz "[zboe::util::read_db zhunt.zombies]";
 				set zcah "[zboe::util::read_db zhunt.activehunt]";
 				set zcam "[zboe::util::read_db zhunt.$zget.ammo]";
@@ -237,6 +239,7 @@ namespace eval zboe {
 				puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Check|| Active: $zcah | Zombies: $zcz | $zcol Level: $zcxl | $zcol Ammo/Clips: $zcam/$zccl | $zcol XP: $zcxp | Horde Tokens: $zcht";
 			}
 			proc reload {nick uhost hand chan text} {
+				if {[file exists "scripts/zboe/zhunt.$nick.xp"] == 0} { zboe::util::init.nick $nick; }
 				set zpam "[zboe::util::read_db zhunt.$nick.ammo]"
 				set zrl "[zboe::util::read_db zhunt.$nick.clips]";
 				if {$zpam >= 1} { puthelp "PRIVMSG $chan :errr! your clip isnt empty!"; return }
@@ -249,6 +252,7 @@ namespace eval zboe {
 			}
 			proc shoot {nick uhost hand chan text} {
 				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| shoot command sent $nick $chan"; }
+				if {[file exists "scripts/zboe/zhunt.activehunt"] == 0} { zboe::util::init.zboe; }
 				set zschk "[zboe::util::read_db zhunt.activehunt]"
 				set zaz "[zboe::util::read_db zhunt.zombies]"
 				if {$zschk == "yes"} {
