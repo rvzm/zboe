@@ -135,6 +135,15 @@ namespace eval zboe {
 			if {$v1 == "die"} { die; return }
 			if {$v1 == "info"} { putserv "PRIVMSG $chan :zboe.tcl running version [zboe::procs::util::getVersion]"; return }
 			if {$v1 == "z"} { putserv "PRIVMSG $chan :o.0.O.0.o Rolling Encounter..."; zboe::procs::zhunt::zcheck; return }
+			if {$v1 == "zc"} {
+				set zcz "[zboe::procs::util::read_db zhunt.zombies]";
+				set zcah "[zboe::procs::util::read_db zhunt.activehunt]";
+				set zcam "[zboe::procs::util::read_db zhunt.$nick.ammo]";
+				set zcxp "[zboe::procs::util::read_db zhunt.$nick.xp]";
+				set zccl "[zboe::procs::util::read_db zhunt.$nick.clips]";
+				puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Check|| Active: $zcah | Zombies: $zcz | Your Ammo: $zcam | Your XP: $zcxp";
+				return;
+			}
 		}
 		proc version {nick uhost hand chan text} {
 			putserv "PRIVMSG $chan :zboe -> version-[zboe::procs::util::getVersion] build [zboe::procs::util::getBuild]"
