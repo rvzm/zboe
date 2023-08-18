@@ -268,17 +268,17 @@ namespace eval zboe {
 						zboe::util::write_db "zhunt.$nick.ammo" $zpam
 						if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| shoot acc: $zpacc check: $zpchk "; }
 						if {$zpchk <= $zpacc} {
-							puthelp "PRIVMSG $chan :o.0.O.0.o ayyy $nick hit the zombie!! They get 1xp"
-							incr zpx
+							puthelp "PRIVMSG $chan :o.0.O.0.o ayyy $nick hit the zombie!! They get 5xp |$zpam/6|"
+							incr zpx 5
 							incr zaz -1
 							zboe::util::write_db "zhunt.$nick.xp" $zpx
 							zboe::util::write_db "zhunt.zombies" $zaz
 							if {${zboe::settings::hunt::multiz} == "yes"} {
 								if {$zaz == "0"} {
 									if {[zboe::util::read_db zhunt.horde] == "yes"} {
-										puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * * * HORDE ELIMINATED (+5 XP) * * *";
+										puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * * * HORDE ELIMINATED (+15 XP) * * *";
 										set zsht "[zboe::util::read_db zhunt.$nick.htok]"
-										incr zpx "5"
+										incr zpx "15"
 										incr zsht
 										zboe::util::write_db "zhunt.$nick.htok" $zsht
 										zboe::util::write_db "zhunt.$nick.xp" $zpx
