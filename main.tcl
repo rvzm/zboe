@@ -160,7 +160,20 @@ namespace eval zboe {
 			return
 		}
 		proc zcheck {nick uhost hand chan} {
-			if {$nick == "zboe"} { putcmdlog "*** zboe|log| Joined $chan"; return }
+			if {$nick == "zboe"} {
+				putcmdlog "*** zboe|log| Joined $chan";
+				if {$chan == ${zboe::settings::gen::homechan}} {
+					if {${zboe::settings::hunt::startonjoin} == "yes"} { 
+						zboe::procs::util::write_db "zhunt.activehunt" "yes";
+						zboe::procs::util::write_db "zhunt.zombies" "0";
+						zboe::procs::zhunt::starthunting;
+						puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Starting... o.0.O.0.o";
+						zboe::procs::zhunt::zcheck;
+						return
+					}
+				}
+				return
+			}
 			if {[file exists "zhunt.$nick.xp"] == 0} {
 				putcmdlog "*** zboe|users| initializing $nick";
 				zboe::procs::util::write_db "zhunt.$nick.xp" "0";
