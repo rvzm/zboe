@@ -361,6 +361,24 @@ namespace eval zboe {
 			global zboe::settings::release
 			return $zboe::settings::release
 		}
+		proc init.nick {nick} {
+		putcmdlog "*** zboe|users| initializing $nick";
+		zboe::util::write_db "zhunt.$nick.xp" "0";
+		zboe::util::write_db "zhunt.$nick.ammo" "6";
+		zboe::util::write_db "zhunt.$nick.clips" "3";
+		zboe::util::write_db "zhunt.$nick.jam" "no";
+		zboe::util::write_db "zhunt.$nick.htok" "0";
+		zboe::util::write_db "zhunt.$nick.level" "1";
+		zboe::util::write_db "zhunt.$nick.maxammo" "6";
+		zboe::util::write_db "zhunt.$nick.maxclip" "3";
+		zboe::util::write_db "zhunt.$nick.maxacc" "45";
+		putcmdlog "*** zboe|users| zjoin: $nick | initialized";
+		}
+		proc init.zboe {} {
+			zboe::util::write_db "zhunt.activehunt" "no";
+			zboe::util::write_db "zhunt.zombies" "0";
+			zboe::util::write_db "zhunt.horde" "no";
+		}
 		proc act {chan text} { putserv "PRIVMSG $chan \01ACTION $text\01"; }
 	}
 }
