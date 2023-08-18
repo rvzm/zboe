@@ -160,6 +160,7 @@ namespace eval zboe {
 			return
 		}
 		proc zcheck {nick uhost hand chan} {
+			if {$nick == "zboe"} { putcmdlog "*** zboe|log| Joined $chan"; return }
 			if {[file exists "zhunt.$nick.xp"] == 0} {
 				putcmdlog "*** zboe|users| initializing $nick";
 				zboe::procs::util::write_db "zhunt.$nick.xp" "0";
