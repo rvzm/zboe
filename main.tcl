@@ -318,12 +318,33 @@ namespace eval zboe {
 			proc shop {nick uhost hand chan text} {
 				set v1 [lindex [split $text] 0]
 				set v2 [lindex [split $text] 1]
-				if {$v1 == ""} { puthelp "PRIVMSG $chan :o.0.O.0.o zboe Shop - use ${zboe::settings::gen::pubtrig}shop <item number>"; puthelp "PRIVMSG $chan :Current Items: (1) Clip"; return }
+				if {$v1 == ""} { puthelp "PRIVMSG $chan :o.0.O.0.o zboe Shop - use ${zboe::settings::gen::pubtrig}shop <item number>"; puthelp "PRIVMSG $chan :Current Items: (1) Clip (2xp) | (2) LevelUp! (${zboe::settings::shop::lvlup})"; return }
+				if {[file exists "scripts/zboe/zhunt.$nick.xp"] == 0} { zboe::util::init.nick $nick; }
 				if {$v1 == "1"} {
-					set zshop "[zboe::util::read_db zhunt.$nick.clips]";
+					set zshop "[zboe::util::read_db zhunt.$nick.clips]"
+					set zspx "[zboe::util::read_db zhunt.$nick.xp]"
 					incr zshop
+					incr zspx "-${zboe::settings::shop::clips}"
 					zboe::util::write_db "zhunt.$nick.clips" "$zshop";
+					zboe::util::write_db "zhunt.$nick.xp" "$zspx";
 					puthelp "PRIVMSG $chan :o.0.O.0.o You purchased a clip, you now have $zshop clips";
+				}
+				if {$v1 == "2"} {
+					set zsht "[zboe::util::read_db zhunt.$nick.htok]"
+					if {$zsht >= ${zboe::settings::shop::lvlup}} {
+						set zspl "[zboe::util::read_db zhunt.$nick.level]"
+						set zsac "[zboe::util::read_db zhunt.$nick.maxacc]"
+						incr zsht "-${zboe::settings::shop::lvlup}"
+						incr zspl
+						incr zsac 5
+						zboe::util::write_db "zhunt.$nick.level" "$zspl"
+						zboe::util::write_db "zhunt.$nick.htok" "$zsht"
+						zboe::util::write_db "zhunt.$nick.maxacc" "$zsac"
+						puthelp "PRIVMSG $chan :o.0.O.0.o $nick has leveled up to Level $zspl!";
+						return
+					}
+					puthelp "PRIVMSG $chan :o.0.O.0.o Error: You cannot afford that item!";
+					return
 				}
 			}
 		}
