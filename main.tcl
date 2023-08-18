@@ -285,6 +285,7 @@ namespace eval zboe {
 										puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * * * HORDE ELIMINATED (+5 XP) * * *";
 										incr zpx "5"
 										zboe::procs::util::write_db "zhunt.$nick.xp" $zpx
+										zboe::procs::util::write_db "zhunt.horde" "no"
 									}
 									return; 
 								}
