@@ -1,7 +1,7 @@
 namespace eval zboe {
 	namespace eval settings {
 		variable version "0.1"
-		variable build "081812"
+		variable build "081800"
 		variable release "r1"
 		variable debug "1"
 		namespace eval gen {
