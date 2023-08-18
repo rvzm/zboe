@@ -204,7 +204,7 @@ namespace eval zboe {
 				set v1 [lindex [split $text] 0]
 				if {$v1 == ""} {
 					set zpf zhunt.$nick.xp
-					#if {[catch {[zboe::procs::util::read_db "$zpf"]} err]} { zboe::procs::util::write_db $zpf "0"; }
+					#if {[file exists "$zpf"] == 0} { zboe::procs::util::write_db $zpf "0"; }
 					set zpsx "[zboe::procs::util::read_db $zpf]"
 					puthelp "PRIVMSG $chan :o.0.O.0.o You have $zpsx xp!";
 					return
