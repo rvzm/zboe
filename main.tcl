@@ -197,6 +197,12 @@ namespace eval zboe {
 							incr znum -1
 							return
 						}
+						if {$znum >= ${zboe::settings::hunt::maxhorde}} {
+							puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * New zombie trying to join the horde, but the max horde size has been reached!";
+							putcmdlog "*** zboe|debug| Zombie horde max reached";
+							set znum ${zboe::settings::hunt::maxhorde};
+							return
+						}
 						puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * Multiple zombies now infesting the area. | Zombies: $znum ";
 						zboe::util::write_db "zhunt.horde" "yes";
 					}
@@ -210,11 +216,13 @@ namespace eval zboe {
 			}
 			proc stats {nick uhost hand chan text} {
 				set v1 [lindex [split $text] 0]
-				if {$v1 == ""} { set zget $nick; set zcol "Your"; }
 				if {$v1 != ""} {
-					if {[file exists zhunt.$v1.xp] == 0} { puthelp "PRIVMSG $chan :o.0.O.0.o $v1 hasn't started hutning yet."; return }
-					if {[file exists zhunt.$v1.xp] == 1} { set zget $v1; set zcol "$nick's" }
+					set zsxfg "scripts/zboe/zhunt.$v1.xp";
+					if {[file exists $zsxfg] == 0} { puthelp "PRIVMSG $chan :o.0.O.0.o $v1 hasn't started hutning yet."; return }
+					set zget "$v1";
+					set zcol "$v1's";
 				}
+				if {$v1 == ""} { set zget $nick; set zcol "Your"; }
 				set zcz "[zboe::util::read_db zhunt.zombies]";
 				set zcah "[zboe::util::read_db zhunt.activehunt]";
 				set zcam "[zboe::util::read_db zhunt.$zget.ammo]";
@@ -234,7 +242,7 @@ namespace eval zboe {
 				set zschk "[zboe::util::read_db zhunt.activehunt]"
 				set zaz "[zboe::util::read_db zhunt.zombies]"
 				if {$zschk == "yes"} {
-					if {[file exists "zhunt.$nick.ammo"] == 0} {
+					if {[file exists "scripts/zboe/zhunt.$nick.ammo"] == 0} {
 						putcmdlog "*** zboe|users| initializing $nick";
 						zboe::util::write_db "zhunt.$nick.xp" "0";
 						zboe::util::write_db "zhunt.$nick.ammo" "6";
@@ -251,12 +259,13 @@ namespace eval zboe {
 						incr zpam -1
 						set zpacc ${zboe::settings::hunt::accuracy}
 						set zpchk "[rand 99]"
+						set zpf zhunt.$nick.xp
+						set zpx "[zboe::util::read_db $zpf]"
+						putcmdlog "*** zboe|debug| shoot $nick / $zpam / $zpx "
 						zboe::util::write_db "zhunt.$nick.ammo" $zpam
 						if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| shoot acc: $zpacc check: $zpchk "; }
 						if {$zpchk <= $zpacc} {
 							puthelp "PRIVMSG $chan :o.0.O.0.o ayyy $nick hit the zombie!! They get 1xp"
-							set zpf zhunt.$nick.xp
-							set zpx "[zboe::util::read_db $zpf]"
 							incr zpx
 							incr zaz -1
 							zboe::util::write_db "zhunt.$nick.xp" $zpx
