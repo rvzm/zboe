@@ -268,7 +268,7 @@ namespace eval zboe {
 						set zpchk "[rand 99]"
 						set zpf zhunt.$nick.xp
 						set zpx "[zboe::util::read_db $zpf]"
-						putcmdlog "*** zboe|debug| shoot $nick / $zpam / $zpx "
+						putcmdlog "*** zboe|debug| shoot $nick / ammo $zpam / xp $zpx "
 						zboe::util::write_db "zhunt.$nick.ammo" $zpam
 						if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| shoot acc: $zpacc check: $zpchk "; }
 						if {$zpchk <= $zpacc} {
