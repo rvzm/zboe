@@ -7,14 +7,14 @@ namespace eval zboe {
 		namespace eval gen {
 			variable pubtrig "@"
 			variable controller "~z"
-			variable homechan "#fuknz"
+			variable homechan "#bots"
 		}
 		namespace eval hunt {
 			variable trigger "12"
 			variable accuracy "70"
 			variable time "5"
 			variable multiz "no"
-			variable roast "yes"
+			variable roast "no"
 		}
 		namespace eval flags {
 			setudef flag zbot
