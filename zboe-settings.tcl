@@ -17,6 +17,10 @@ namespace eval zboe {
 			variable roast "no"
 			variable startonjoin "yes"
 		}
+		namespace eval shop {
+			variable clips "2"
+			variable lvlup "2"
+		}
 		namespace eval flags {
 			setudef flag zbot
 			setudef flag zr1
