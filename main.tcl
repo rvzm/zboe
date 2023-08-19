@@ -242,6 +242,7 @@ namespace eval zboe {
 				set zcxl "[zboe::util::read_db zhunt.$zget.level]";
 				set zcpj "[zboe::util::read_db zhunt.$zget.jam]";
 				set zcma "[zboe::util::read_db zhunt.$zget.maxammo]";
+				set zcmc "[zboe::util::read_db zhunt.$zget.maxclip]";
 				set zcmac "[zboe::util::read_db zhunt.$zget.maxacc]";
 				puthelp "PRIVMSG $chan :||Zombie Hunt Stats|| $zget | $zcol Level: $zcxl | $zcol XP: $zcxp | $zcol Ammo/Clips: $zcam/$zccl";
 				puthelp "PRIVMSG $chan :o.0.O.0.o || Horde Tokens: $zcht | Max Accuracy: $zcmac | Clip Size: $zcma | Max Clips: $zcmc | Gun Jam: $zcpj";
@@ -321,11 +322,13 @@ namespace eval zboe {
 				if {$v1 == "1"} {
 					set zshop "[zboe::util::read_db zhunt.$nick.clips]"
 					set zspx "[zboe::util::read_db zhunt.$nick.xp]"
+					set zsmc "[zboe::util::read_db zhunt.$nick.maxclip]"
+					if {$zshop > $zsmc} { puthelp "PRIVMSG $chan :o.0.O.0.o errr, you are at your max clips!"; return }
 					incr zshop
 					incr zspx "-${zboe::settings::shop::clips}"
 					zboe::util::write_db "zhunt.$nick.clips" "$zshop";
 					zboe::util::write_db "zhunt.$nick.xp" "$zspx";
-					puthelp "PRIVMSG $chan :o.0.O.0.o You purchased a clip, you now have $zshop clips";
+					puthelp "PRIVMSG $chan :o.0.O.0.o You purchased a clip, you now have $zshop/$zsmc clips";
 				}
 				if {$v1 == "2"} {
 					set zsht "[zboe::util::read_db zhunt.$nick.htok]"
