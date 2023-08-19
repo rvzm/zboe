@@ -252,9 +252,10 @@ namespace eval zboe {
 				if {[file exists "scripts/zboe/zhunt.$nick.xp"] == 0} { zboe::util::init.nick $nick; }
 				set zpam "[zboe::util::read_db zhunt.$nick.ammo]"
 				set zrl "[zboe::util::read_db zhunt.$nick.clips]";
+				set zrma "[zboe::util::read_db zhunt.$nick.maxammo]";
 				if {$zpam >= 1} { puthelp "PRIVMSG $chan :errr! your clip isnt empty!"; return }
 				if {$zrl == 0} { puthelp "PRIVMSG $chan :errr! You have no clips!"; return }
-				zboe::util::write_db "zhunt.$nick.ammo" "6"
+				zboe::util::write_db "zhunt.$nick.ammo" "$zrma"
 				incr zrl -1
 				zboe::util::write_db "zhunt.$nick.clips" "$zrl"
 				puthelp "PRIVMSG $chan :o.0.O.0.o Reloaded bitch! (Clips left: $zrl)";
