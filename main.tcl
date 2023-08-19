@@ -324,12 +324,14 @@ namespace eval zboe {
 					set zshop "[zboe::util::read_db zhunt.$nick.clips]"
 					set zspx "[zboe::util::read_db zhunt.$nick.xp]"
 					set zsmc "[zboe::util::read_db zhunt.$nick.maxclip]"
-					if {$zshop > $zsmc} { puthelp "PRIVMSG $chan :o.0.O.0.o errr, you are at your max clips!"; return }
-					incr zshop
-					incr zspx "-${zboe::settings::shop::clips}"
-					zboe::util::write_db "zhunt.$nick.clips" "$zshop";
-					zboe::util::write_db "zhunt.$nick.xp" "$zspx";
-					puthelp "PRIVMSG $chan :o.0.O.0.o You purchased a clip, you now have $zshop/$zsmc clips";
+					if {$zshop <= $zsmc} {
+						incr zshop
+						incr zspx "-${zboe::settings::shop::clips}"
+						zboe::util::write_db "zhunt.$nick.clips" "$zshop";
+						zboe::util::write_db "zhunt.$nick.xp" "$zspx";
+						puthelp "PRIVMSG $chan :o.0.O.0.o You purchased a clip, you now have $zshop/$zsmc clips";
+						return
+					} else { puthelp "PRIVMSG $chan :o.0.O.0.o errr, you are at your max clips!"; return }
 				}
 				if {$v1 == "2"} {
 					set zsht "[zboe::util::read_db zhunt.$nick.htok]"
