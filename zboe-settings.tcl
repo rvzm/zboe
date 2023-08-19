@@ -10,7 +10,7 @@ namespace eval zboe {
 			variable homechan "#bots"
 		}
 		namespace eval hunt {
-			variable trigger "12"
+			variable trigger "14"
 			variable time "3"
 			variable horde "no"
 			variable maxhorde "5"
