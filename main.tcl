@@ -199,7 +199,7 @@ namespace eval zboe {
 					incr znum
 					if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|debug| zcheck active: $zha | zombies: $znum"; }
 					if {$znum >= "2"} {
-						if {${zboe::settings::hunt::multiz} == "no"} { 
+						if {${zboe::settings::hunt::horde} == "no"} { 
 							putcmdlog "*** zboe|debug| zcheck - halting, zombie still loose"
 							if {${zboe::settings::hunt::roast} == "yes"} { puthelp "PRIVMSG $chan :o.0.O.0.o There would've been another zombie, but y'all havent hit this one yet."; }
 							incr znum -1
@@ -281,7 +281,7 @@ namespace eval zboe {
 							incr zaz -1
 							zboe::util::write_db "zhunt.$nick.xp" $zpx
 							zboe::util::write_db "zhunt.zombies" $zaz
-							if {${zboe::settings::hunt::multiz} == "yes"} {
+							if {${zboe::settings::hunt::horde} == "yes"} {
 								if {$zaz == "0"} {
 									if {[zboe::util::read_db zhunt.horde] == "yes"} {
 										puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * * * HORDE ELIMINATED (+15 XP) * * *";

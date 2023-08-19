@@ -12,7 +12,7 @@ namespace eval zboe {
 		namespace eval hunt {
 			variable trigger "12"
 			variable time "3"
-			variable multiz "no"
+			variable horde "no"
 			variable maxhorde "5"
 			variable roast "no"
 			variable startonjoin "yes"
