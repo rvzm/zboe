@@ -180,7 +180,7 @@ namespace eval zboe {
 				set chan ${zboe::settings::gen::homechan}
 				zboe::util::write_db "zhunt.activehunt" "yes"
 				zboe::util::write_db "zhunt.zombies" "0"
-				timer ${zboe::settings::hunt::time} zboe::procs::zhunt::zspaw 0 zhunttimer
+				timer ${zboe::settings::hunt::time} zboe::procs::zhunt::zspawn 0 zhunttimer
 			}
 			proc stophunting {} {
 				set chan ${zboe::settings::gen::homechan}
