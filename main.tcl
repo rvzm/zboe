@@ -240,7 +240,12 @@ namespace eval zboe {
 				set zccl "[zboe::util::read_db zhunt.$zget.clips]";
 				set zcht "[zboe::util::read_db zhunt.$zget.htok]";
 				set zcxl "[zboe::util::read_db zhunt.$zget.level]";
-				puthelp "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Check|| Active: $zcah | Zombies: $zcz | $zcol Level: $zcxl | $zcol Ammo/Clips: $zcam/$zccl | $zcol XP: $zcxp | Horde Tokens: $zcht";
+				set zcpj "[zboe::util::read_db zhunt.$zget.jam]";
+				set zcma "[zboe::util::read_db zhunt.$zget.maxammo]";
+				set zcmac "[zboe::util::read_db zhunt.$zget.maxacc]";
+				puthelp "PRIVMSG $chan :||Zombie Hunt Stats|| $zget | $zcol Level: $zcxl | $zcol XP: $zcxp | $zcol Ammo/Clips: $zcam/$zccl";
+				puthelp "PRIVMSG $chan :o.0.O.0.o || Horde Tokens: $zcht | Max Accuracy: $zcmac | Clip Size: $zcma | Max Clips: $zcmc | Gun Jam: $zcpj";
+				return
 			}
 			proc reload {nick uhost hand chan text} {
 				if {[file exists "scripts/zboe/zhunt.$nick.xp"] == 0} { zboe::util::init.nick $nick; }
