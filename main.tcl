@@ -168,7 +168,11 @@ namespace eval zboe {
 			}
 			if {$chan == ${zboe::settings::gen::homechan}} {
 				if {[file exists "zhunt.$nick.xp"] == 0} { zboe::util::init.nick $nick; }
-				if {[zboe::util::read_db "zhunt.activehunt"] == "yes"} { puthelp "PRIVMSG $chan :o.0.O.0.o. There is currently an active hunt! there are [zboe::util::read_db "zhunt.zombies"] zombies around currently."; }
+				if {[zboe::util::read_db "zhunt.activehunt"] == "yes"} { puthelp "PRIVMSG $chan :o.0.O.0.o. There is currently an active hunt! there are [zboe::util::read_db "zhunt.zombies"] zombies around currently. || use ${zboe::settings::gen::pubtrig}shoot and ${zboe::settings::gen::pubtrig}reload"; }
+				if {[zboe::util::read_db "zhunt.horde"] == "yes"} {
+					if {[zboe::util::read_db "zhunt.zombies"] == ${zboe::settings::hunt::maxhorde}} { puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! The horde is currently at MAX STRENGTH!!"; return }
+					puthelp "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! Help clear up the horde!";
+				}
 			}
 		}
 		namespace eval zhunt {
