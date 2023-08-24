@@ -43,3 +43,16 @@
  startonjoin - start an active hunt session when zboe joins the homechan 
  
  maxhorde - maximum horde size for multi-zombie mode
+
+# SHOP SETTINGS
+### Determines prices for system shop, here we will describe what each option is for, and what they use for currency. Some use XP, and some use Horde Tokens (HT)
+
+ clips - (XP) max storage for players ammo clips
+ 
+ lvlup - (HT) Player level, also increases base accuracy, and clip storage
+ 
+ accuracyupgrade - (HT) Player accuracy, increases by 5
+ 
+ clipupgrade - (HT) Clip Storage, increases by 1
+ 
+ hordetoken - (XP) high cost XP to Horde Token conversion
