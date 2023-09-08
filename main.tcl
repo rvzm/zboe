@@ -100,12 +100,13 @@ namespace eval zboe {
 				if {$v2 == "restart"} { putserv "NOTICE $nick :zboe command 'restart' - restarts zboe bot"; return }
 				if {$v2 == "die"} { putserv "NOTICE $nick :zboe command 'die' - forces zboe bot to shut down"; return }
 				if {$v2 == "info"} { putserv "NOTICE $nick :zboe command 'info' - displays current version information to channel"; return }
-				if {$v2 == "group"} { putserv "NOTICE $nick :zboe command 'group' - uses nickserv to group zboe with the nick provided in the 'gnick' setting"; return }
+				if {$v2 == "z"} { putserv "NOTICE $nick :zboe command 'z' - rolls zombie encounter."; return }
+				if {$v2 == "zc"} { putserv "NOTICE $nick :zboe command 'zc' - gives you the current stands for both you and the hunt."; return }
+				if {$v2 == "zs"} { putserv "NOTICE $nick :zboe command 'zr' - resets all hunt options/players."; return }
 				if {$v2 == ""} {
-					putserv "NOTICE $nick :zboe controll commands - rehash restart die"
+					putserv "NOTICE $nick :zboe controll commands - rehash restart die info z zc zr"
 					return
 					}
-				putcmdlog "*** zboe controller $nick - help command error - no if statement triggered"
 				}
 			if {$v1 == "rehash"} {
 				putserv "PRIVMSG $chan :Reloading configuration..."; 
@@ -128,13 +129,18 @@ namespace eval zboe {
 				putserv "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Check|| Active: $zcah | Zombies: $zcz | Your Level: $zcxl| Your Ammo/Clips: $zcam/zccl | Your XP: $zcxp | Horde Tokens: $zcht";
 				return
 			}
-			if {$v1 == "zs"} {
-				if {[file exists "scripts/zboe/zhunt.activehunt"] == 0} { zboe::util::write_db "zhunt.activehunt" "no"; }
-				if {[file exists "scripts/zboe/zhunt.zombies"] == 0} { zboe::util::write_db "zhunt.zombies" "0"; }
-				if {[file exists "scripts/zboe/zhunt.horde"] == 0} { zboe::util::write_db "zhunt.horde" "no"; }
-				putserv "PRIVMSG $chan :o.0.O.0.o Zombie Start Initialized. Hunt now available.";
+			if {$v1 == "zr"} {
+				putserv "NOTICE $nick :zboe||control /!\\ RESETTING ZHUNT /!\\ "
+				zboe::procs::zhunt::stophunting;
+				zboe::util::write_db "zhunt.activehunt" "no"
+				zboe::util::write_db "zhunt.zombies" "0"
+				zboe::util::write_db "zhunt.horde" "no"
+				file delete -force -- {*}[glob scripts/zboe/zhunt.*]
+				putserv "PRIVMSG $chan :o.0.O.0.o /!\\ ZHUNT HAS BEEN RESET. All player data erased.";
 				return
 			}
+			putcmdlog "*** zboe controller $nick - help command error - no if statement triggered"
+			putserv "NOTICE $nick :Error- No control command given. use '${zboe::settings::gen::controller} help' to see commands."
 		}
 		proc version {nick uhost hand chan text} {
 			putserv "PRIVMSG $chan :zboe -> version-[zboe::util::getVersion] build [zboe::util::getBuild]"
@@ -229,12 +235,12 @@ namespace eval zboe {
 				set v1 [lindex [split $text] 0]
 				if {$v1 != ""} {
 					set zsxfg "scripts/zboe/zhunt.$v1.xp";
-					if {[file exists $zsxfg] == 0} { putserv "PRIVMSG $chan :o.0.O.0.o $v1 hasn't started hutning yet."; return }
 					set zget "$v1";
 					set zcol "$v1's";
 				}
 				if {$v1 == ""} { set zget $nick; set zcol "Your"; }
 				if {[file exists "scripts/zboe/zhunt.$nick.xp"] == 0} { zboe::util::init.nick $nick; }
+				if {[file exists "scripts/zboe/zhunt.zombies"] == 0} { zboe::util::init.zboe; }
 				set zcz "[zboe::util::read_db zhunt.zombies]";
 				set zcah "[zboe::util::read_db zhunt.activehunt]";
 				set zcam "[zboe::util::read_db zhunt.$zget.ammo]";
@@ -293,9 +299,9 @@ namespace eval zboe {
 							if {${zboe::settings::hunt::horde} == "yes"} {
 								if {$zaz == "0"} {
 									if {[zboe::util::read_db zhunt.horde] == "yes"} {
-										putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * * * HORDE ELIMINATED (+15 XP | +1 Horde Token) * * *";
+										putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * * * HORDE ELIMINATED (+35 XP | +1 Horde Token) * * *";
 										set zsht "[zboe::util::read_db zhunt.$nick.htok]"
-										incr zpx "15"
+										incr zpx "35"
 										incr zsht
 										zboe::util::write_db "zhunt.$nick.htok" $zsht
 										zboe::util::write_db "zhunt.$nick.xp" $zpx
@@ -360,7 +366,7 @@ namespace eval zboe {
 						zboe::util::write_db "zhunt.$nick.htok" "$zsht"
 						zboe::util::write_db "zhunt.$nick.maxacc" "$zsac"
 						zboe::util::write_db "zhunt.$nick.maxclip.a1" "$zsmc";
-						putserv "NOTICE $nick :o.0.O.0.o $nick has leveled up to Level $zspl!";
+						putserv "NOTICE $nick :o.0.O.0.o You leveled up to Level $zspl!";
 						return
 					}
 					putserv "NOTICE $nick :o.0.O.0.o Error: You cannot afford that item!";
@@ -374,7 +380,7 @@ namespace eval zboe {
 						incr zsacc 5
 						zboe::util::write_db "zhunt.$nick.htok" "$zsht"
 						zboe::util::write_db "zhunt.$nick.maxacc" "$zsacc"
-						putserv "NOTICE $nick :o.0.O.0.o $nick Max Accuracy inreased to $zsacc";
+						putserv "NOTICE $nick :o.0.O.0.o Max Accuracy inreased to $zsacc";
 						return
 					}
 					putserv "NOTICE $nick :o.0.O.0.o Error: You cannot afford that item!";
@@ -388,7 +394,7 @@ namespace eval zboe {
 						incr zsht
 						zboe::util::write_db "zhunt.$nick.htok" "$zsht"
 						zboe::util::write_db "zhunt.$nick.xp" "$zspx"
-						putserv "NOTICE $nick :o.0.O.0.o $nick Purchased a Horde Token. They now have $zsht tokens.";
+						putserv "NOTICE $nick :o.0.O.0.o You purchased a Horde Token. You now have $zsht tokens.";
 						return
 						}
 					putserv "NOTICE $nick :o.0.O.0.o Error: You cannot afford that item!";
@@ -400,7 +406,7 @@ namespace eval zboe {
 					if {$zspx >= ${zboe::settings::shop::clipupgrade}} {
 						incr zsht "-${zboe::settings::shop::clipupgrade}"
 						incr zsmc
-						putserv "NOTICE $nick :o.0.O.0.o $nick Max Clips inreased to $zsmc";
+						putserv "NOTICE $nick :o.0.O.0.o Max Clips inreased to $zsmc";
 						zboe::util::write_db "zhunt.$nick.htok" "$zsht"
 						zboe::util::write_db "zhunt.$nick.maxclip.a1" "$zsmc"
 						return
