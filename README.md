@@ -1,4 +1,5 @@
-#  zboe 0.1 by rvzm
+#  zboe 0.2 by rvzm
+# Release 0.2r1
  zombie  hunting game for eggdrop
 
 # INSTALL
@@ -19,7 +20,9 @@
  
  Horde Tokens will be used to make "player upgrades" for things like better accuracy, clip capacity and storage space, and boosts for things like xp, tracker ammo, etc.
  
- XP will be used to purchase level-ups, which will improve accuracy, clip capacity, and clip storage. These upgrades are permenant, however XP is used to purchase these and other items.
+ XP will be used to purchase horde tokens and clip storage. These upgrades are permenant.
+ 
+ Currently the shop is still in development, and some items are listed but not implemented
  
 
 # SETTINGS 
