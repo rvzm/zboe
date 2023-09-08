@@ -1,9 +1,9 @@
 namespace eval zboe {
 	namespace eval settings {
-		variable version "0.2"
-		variable build "082703"
-		variable release "r1"
-		variable debug "1"
+		variable version "0.2d"
+		variable build "090803"
+		variable release "dev"
+		variable debug "2"
 		namespace eval gen {
 			variable pubtrig "@"
 			variable controller "~z"
