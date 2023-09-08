@@ -1,5 +1,5 @@
-#  zboe 0.2 by rvzm
-# Release 0.2r1
+#  zboe 0.2d by rvzm
+# Release 0.2DEV
  zombie  hunting game for eggdrop
 
 # INSTALL
@@ -31,6 +31,8 @@
  controller - owner control command, whole command goes here, not just trigger character
 
  homechan - The channel you want the script to run on.
+ 
+ sqldir - Directory to use for sqlite3 db file. probably set this to somewhere your web server can access, HTML/PHP stats page coming soon.
 
 # HUNT SETTINGS
  trigger - trigger sensitivity, max of 15. higher means more encounters
