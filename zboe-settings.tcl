@@ -1,8 +1,8 @@
 namespace eval zboe {
 	namespace eval settings {
 		variable version "0.2"
-		variable build "081805"
-		variable release "r0"
+		variable build "082703"
+		variable release "r1"
 		variable debug "1"
 		namespace eval gen {
 			variable pubtrig "@"
@@ -10,25 +10,22 @@ namespace eval zboe {
 			variable homechan "#bots"
 		}
 		namespace eval hunt {
-			variable trigger "14"
-			variable time "3"
-			variable horde "no"
-			variable maxhorde "5"
+			variable trigger "8"
+			variable time "5"
+			variable horde "yes"
+			variable maxhorde "3"
 			variable roast "no"
 			variable startonjoin "yes"
 		}
 		namespace eval shop {
 			variable clips "2"
-			variable lvlup "2"
+			variable lvlup "5"
+			variable accuracyupgrade "2"
+			variable clipupgrade "10"
+			variable hordetokens "35"
 		}
 		namespace eval flags {
-			setudef flag zbot
-			setudef flag zr1
-			setudef flag zr2
-			setudef flag zr3
-			setudef flag zr4
-			setudef flag zr5
-			setudef flag zrc
+			setudef flag zboe
 		}
 	}
 }
