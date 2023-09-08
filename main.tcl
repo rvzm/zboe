@@ -27,11 +27,8 @@ namespace eval zboe {
 		proc zboe:main {nick uhost hand chan text} {
 			if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "main command sent| $nick $chan - $text"; }
 			set v1 [lindex [split $text] 0]
-			if {${zboe::settings::debug} == "2"} { zboe::util::zboedbg "(level2) main command var 1 set"; }
 			set v2 [lindex [split $text] 1]
-			if {${zboe::settings::debug} == "2"} { zboe::util::zboedbg "(level2) main command var 2 set"; }
 			set v3 [lindex [split $text] 2]
-			if {${zboe::settings::debug} == "2"} { zboe::util::zboedbg "(level2) main command var 3 set"; }
 			if {$v1 == ""} {
 				if {${zboe::settings::debug} == "2"} { zboe::util::zboedbg "(level2) main command recieved no input, informing chan and halting"; }
 				putserv "PRIVMSG $chan :\037ERROR\037: Incorrect Parameters. \037SYNTAX\037: ${zboe::settings::gen::pubtrig}zboe help"; return
@@ -168,7 +165,7 @@ namespace eval zboe {
 			if {$chan == ${zboe::settings::gen::homechan}} {
 				if {[zboe::sql::util::checkxp $nick] == 0} { zboe::sql::util::dbmake "$nick"; }
 				if {[zboe::sql::util::checksetting "hunt"] == "yes"} { putserv "PRIVMSG $chan :o.0.O.0.o. There is currently an active hunt! there are [zboe::sql::util::checksetting "zombiecount"] zombies around currently. || use ${zboe::settings::gen::pubtrig}shoot and ${zboe::settings::gen::pubtrig}reload"; }
-				if {[zboe::sql::util::changesetting "fullhorde"] == "yes"} {
+				if {[zboe::sql::util::checksetting "fullhorde"] == "yes"} {
 					if {[zboe::sql::util::checksetting "zombiecount"] == ${zboe::settings::hunt::maxhorde}} { putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! The horde is currently at MAX STRENGTH!!"; return }
 					putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! Help clear up the horde!";
 				}
@@ -192,7 +189,7 @@ namespace eval zboe {
 				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "zombie check - rolling encounter"; }
 				set chan ${zboe::settings::gen::homechan}
 				set tchk "[rand 15]"
-				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "zcheck $tchk"; }
+				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "(level2) zcheck $tchk"; }
 				set zha "[zboe::sql::util::checksetting hunt]"
 				set znum "[zboe::sql::util::checksetting zombiecount]"
 				set zsph "[zboe::sql::util::checksetting fullhorde]"
@@ -200,10 +197,10 @@ namespace eval zboe {
 					incr znum
 					if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "DER BE ZOMBIES"; }
 					if {$zsph == "no"} { putserv "PRIVMSG $chan :o.0.O.0.o Zombie Spotted! Shoot that fucker!"; }
-					if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "zcheck active: $zha | zombies: $znum"; }
+					if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "(level2) zcheck active: $zha | zombies: $znum"; }
 					if {$znum >= "2"} {
 						if {${zboe::settings::hunt::horde} == "no"} { 
-							if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "zcheck - halting, zombie still loose" }
+							if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "zcheck - halting, zombie still loose" }
 							if {${zboe::settings::hunt::roast} == "yes"} { putserv "PRIVMSG $chan :o.0.O.0.o There would've been another zombie, but y'all havent hit this one yet."; }
 							incr znum -1
 							return
@@ -217,22 +214,27 @@ namespace eval zboe {
 						if {$znum == ${zboe::settings::hunt::maxhorde}} { putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * Horde now at MAX STRENGTH!!"; } else { putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * Multiple zombies now infesting the area. | Zombies: $znum "}
 						zboe::sql::util::changesetting "fullhorde" "yes";
 					}
-					zboe::sql::util::changesetting "zombiescount" $znum;
+					zboe::sql::util::changesetting "zombiecount" $znum;
 					return
 				}
 				if {${zboe::settings::hunt::roast} == "yes"} { putserv "PRIVMSG $chan :o.0.O.0.o You lucky fucks, a zombie almost entered, but wandered away"; }
 				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "no zombie"; }
 			}
 			proc stats {nick uhost hand chan text} {
+				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "stats command issued"; }
 				set v1 [lindex [split $text] 0]
 				if {$v1 != ""} {
 					set zget "$v1";
 					set zcol "$v1's";
 				}
 				if {$v1 == ""} { set zget $nick; set zcol "Your"; }
+				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "(level2) Grabbing stats for $zget"; }
 				zboe::sql::util::dbmake "$zget";
+				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "(level2) Grabbing zombiecount"; }
 				set zcz "[zboe::sql::util::checksetting zombiecount]";
+				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "(level2) Grabbing hunt setting"; }
 				set zcah "[zboe::sql::util::checksetting hunt]";
+				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "(level2) Grabbing user data"; }
 				set zcam "[zboe::sql::util::checkammo $zget]";
 				set zcxp "[zboe::sql::util::checkxp $zget]";
 				set zccl "[zboe::sql::util::checkclips $zget]";
@@ -242,17 +244,22 @@ namespace eval zboe {
 				set zcma "[zboe::sql::util::checkmaxammo $zget]";
 				set zcmc "[zboe::sql::util::checkmaxclips $zget]";
 				set zcmac "[zboe::sql::util::checkaccuracy $zget]";
+				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "(level2) Sending Stats"; }
 				putserv "PRIVMSG $chan :||Zombie Hunt || $zget | $zcol Level: $zcxl | $zcol XP: $zcxp | $zcol Ammo/Clips: $zcam/$zccl";
 				putserv "PRIVMSG $chan :||Stats o.0.o || Horde Tokens: $zcht | Max Accuracy: $zcmac | Clip Size: $zcma | Max Clips: $zcmc | Gun Jam: $zcpj";
 				return
 			}
 			proc reload {nick uhost hand chan text} {
+				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "Reload: DB Check"; }
 				zboe::sql::util::dbmake "$nick"
 				set zpam "[zboe::sql::util::checkammo $nick]"
 				set zrl "[zboe::sql::util::checkclips $nick]";
 				set zrma "[zboe::sql::util::checkmaxammo $nick]";
+				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "Reload: Checking Ammo"; }
 				if {$zpam >= 1} { putserv "PRIVMSG $chan :errr! your clip isnt empty!"; return }
+				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "Reload: Checking Clip Storage"; }
 				if {$zrl == 0} { putserv "PRIVMSG $chan :errr! You have no clips!"; return }
+				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "Reload: Reloading!!"; }
 				zboe::sql::util::changeammo "$nick" "$zrma"
 				incr zrl -1
 				zboe::sql::util::changeclips "$nick" "$zrl"
@@ -261,11 +268,11 @@ namespace eval zboe {
 			}
 			proc shoot {nick uhost hand chan text} {
 				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "shoot command sent $nick $chan"; }
+				zboe::sql::util::dbmake "$nick"
 				set zschk "[zboe::sql::util::checksetting hunt]"
 				set zaz "[zboe::sql::util::checksetting zombiecount]"
 				set zakc "[zboe::sql::util::checkkills $nick]"
 				if {$zschk == "yes"} {
-					if {[zboe::sql::util::checkxp "$nick"] == 0} { zboe::util::init.nick $nick; }
 					set zpam "[zboe::sql::util::checkammo $nick]"
 					if {$zaz >= "1"} {
 						if {$zpam == "0"} {
@@ -274,28 +281,34 @@ namespace eval zboe {
 						}
 						incr zpam -1
 						set zpacc "[zboe::sql::util::checkaccuracy $nick]"
-						set zpx "[zboe::sql::util::checkaccuracy $nick]"
+						set zpx "[zboe::sql::util::checkxp $nick]"
 						set zpchk "[rand 99]"
 						if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "shoot $nick / ammo $zpam / xp $zpx "; }
 						zboe::sql::util::changeammo "$nick" $zpam
 						if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "shoot acc: $zpacc check: $zpchk "; }
 						if {$zpchk <= $zpacc} {
 							putserv "PRIVMSG $chan :o.0.O.0.o ayyy $nick hit the zombie!! They get 5xp |$zpam/6|"
+							if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "running stat changes| "; }
 							incr zpx 5
 							incr zaz -1
-							incr zakc
-							zboe::sql::util::changexp "$nick" $zpx
-							zboe::sql::util::changesetting "zombiecount" $zaz
-							zboe::sql::util::changekills "$nick" $zakc
+							incr zakc 1
+							if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "updating xp $nick $zpx "; }
+							zboe::sql::util::changexp "$nick" "$zpx"
+							if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "updating zombiecount $zaz "; }
+							zboe::sql::util::changesetting "zombiecount" "$zaz"
+							if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "updating kills $nick $zakc "; }
+							zboe::sql::util::changekills "$nick" "$zakc"
 							if {${zboe::settings::hunt::horde} == "yes"} {
 								if {$zaz == "0"} {
 									if {[zboe::sql::util::checksetting "fullhorde"] == "yes"} {
 										putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * * * HORDE ELIMINATED (+35 XP | +1 Horde Token) * * *";
 										set zsht "[zboe::sql::util::checkhordetokens $nick]"
 										incr zpx "35"
-										incr zsht
-										zboe::sql::util::changehordetokens "$nick" $zsht
-										zboe::sql::util::changexp "$nick" $zpx
+										incr zsht 1
+										if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "updating hordetokens $nick $zsht "; }
+										zboe::sql::util::changehordetokens "$nick" "$zsht"
+										if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "updating xp $nick $zpx "; }
+										zboe::sql::util::changexp "$nick" "$zpx"
 										zboe::sql::util::changesetting "fullhorde" "no"
 									}
 									return; 
@@ -435,7 +448,10 @@ namespace eval zboe {
 	namespace eval sql {
         namespace eval util {
             proc dbmake {user} {
-                if {[zdb exists {SELECT xp FROM users WHERE user="$user"}] == "true"} {
+				set zdbc "[zdb eval {SELECT * FROM users WHERE user=$user}]"
+				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "(level2) dbmake: $user | $zdbc"; }
+				set zdbc [lindex [split $zdbc] 0]
+                if {$zdbc == $user} {
                     putcmdlog "***zboe|debug-sql|Error! Cannot create users row, it already exists."
                     return 
                 } else {
@@ -447,109 +463,119 @@ namespace eval zboe {
 
             proc initdb {} {
 				putcmdlog "***zboe|debug-sql| initializing sql"
-                zdb eval {CREATE TABLE settings(hunt TEXT, zombiecount INTEGER, fullhorde TEXT)}
-                zdb eval {INSERT INTO settings VALUES('no', 0, 'no')}
+                zdb eval {CREATE TABLE settings(hunt TEXT, zombiecount INTEGER, fullhorde TEXT, id INTEGER)}
+                zdb eval {INSERT INTO settings VALUES('no', 0, 'no', 0)}
+				#                               0           1            2           3              4                 5        6              7              8                 9                 10              
 				zdb eval {CREATE TABLE users(user TEXT, xp INTEGER, level INTEGER, kills INTEGER, accuracy INTEGER, jam TEXT, ammo INTEGER, clips INTEGER, maxammo INTEGER, maxclips INTEGER, hordetokens INTEGER)}
 				putcmdlog "***zboe|debug-sql| SQL Database initialized"
             }
 
             proc checksetting {sett} {
-                set zhnt [zdb eval {SELECT $sett FROM settings}]
-                return $zhnt
+                set zhnt "[zdb eval {SELECT * FROM settings}]"
+				zboe::util::zboedbg "(level2) SETTINGS-GRAB: $zhnt"
+				if {$sett == "hunt"} { set zhntok "0" }
+				if {$sett == "zombiecount"} { set zhntok "1" }
+				if {$sett == "fullhorde"} { set zhntok "2" }
+                return [lindex [split $zhnt] $zhntok]
             }
 
             proc changesetting {sett v} {
-                zdb eval {INSERT OR REPLACE INTO settings (settings, :sett) VALUES (:sett, :v)} -parameters [list sett $sett v $v]
+				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "(level2) SETTINGS-CHANGE: $sett - $v" }
+                zdb eval "UPDATE settings SET $sett = ('$v')"
             }
+			
+			proc changeuserdat {user col v} {
+				zdb eval "UPDATE users SET $col = ('$v') WHERE user = '$user'"
+			}
 
             proc checkxp {user} {
-                set zdbrt [zdb eval {SELECT xp FROM users WHERE user=:user} -parameters [list user $user]]
-                return $zdbrt
+                set zdbrt "[zdb eval {SELECT * FROM users WHERE user=$user}]"
+                return [lindex [split $zdbrt] 1]
             }
 
 			proc checkaccuracy {user} {
-                set zdbrt [zdb eval {SELECT accuracy FROM users WHERE user=:user} -parameters [list user $user]]
-                return $zdbrt
+                set zdbrt "[zdb eval {SELECT * FROM users WHERE user=$user}]"
+                return [lindex [split $zdbrt] 4]
             }
 
 			proc checkjam {user} {
-                set zdbrt [zdb eval {SELECT jam FROM users WHERE user=:user} -parameters [list user $user]]
-                return $zdbrt
+                set zdbrt "[zdb eval {SELECT * FROM users WHERE user=$user}]"
+                return [lindex [split $zdbrt] 5]
             }
 
             proc checklevel {user} {
-                set zdbrt [zdb eval {SELECT level FROM users WHERE user=:user} -parameters [list user $user]]
-                return $zdbrt
+                set zdbrt "[zdb eval {SELECT * FROM users WHERE user=$user}]"
+                return [lindex [split $zdbrt] 2]
             }
 
             proc checkammo {user} {
-                set zdbrt [zdb eval {SELECT ammo FROM users WHERE user=:user} -parameters [list user $user]]
-                return $zdbrt
+                set zdbrt "[zdb eval {SELECT * FROM users WHERE user=$user}]"
+                return [lindex [split $zdbrt] 6]
             }
 
             proc checkclips {user} {
-                set zdbrt [zdb eval {SELECT clips FROM users WHERE user=:user} -parameters [list user $user]]
-                return $zdbrt
+                set zdbrt "[zdb eval {SELECT * FROM users WHERE user=$user}]"
+                return [lindex [split $zdbrt] 7]
             }
 
             proc checkmaxammo {user} {
-                set zdbrt [zdb eval {SELECT maxammo FROM users WHERE user=:user} -parameters [list user $user]]
-                return $zdbrt
+                set zdbrt "[zdb eval {SELECT * FROM users WHERE user=$user}]"
+                return [lindex [split $zdbrt] 8]
             }
 
             proc checkmaxclips {user} {
-                set zdbrt [zdb eval {SELECT maxclips FROM users WHERE user=:user} -parameters [list user $user]]
-                return $zdbrt
+                set zdbrt "[zdb eval {SELECT * FROM users WHERE user=$user}]"
+                return [lindex [split $zdbrt] 9]
             }
 
             proc checkhordetokens {user} {
-                set zdbrt [zdb eval {SELECT hordetokens FROM users WHERE user=:user} -parameters [list user $user]]
-                return $zdbrt
+                set zdbrt "[zdb eval {SELECT * FROM users WHERE user=$user}]"
+                return [lindex [split $zdbrt] 10]
             }
 
             proc checkkills {user} {
-                set zdbrt [zdb eval {SELECT kills FROM users WHERE user=:user} -parameters [list user $user]]
-                return $zdbrt
+                set zdbrt "[zdb eval {SELECT * FROM users WHERE user=$user}]"
+                return [lindex [split $zdbrt] 3]
             }
 
             proc changexp {user v} {
-                zdb eval {INSERT OR REPLACE INTO users (user, xp) VALUES (:user, :v)} -parameters [list user $user v $v]
+				zdb eval "UPDATE users SET xp = ('$v') WHERE user = '$user'"
             }
 
             proc changelevel {user v} {
-                zdb eval {INSERT OR REPLACE INTO users (user, level) VALUES (:user, :v)} -parameters [list user $user v $v]
+                zdb eval "UPDATE users SET level = ('$v') WHERE USER = '$user'"
             }
 
 			proc changeaccuracy {user v} {
-                zdb eval {INSERT OR REPLACE INTO users (user, accuracy) VALUES (:user, :v)} -parameters [list user $user v $v]
+                zdb eval "UPDATE users SET accuracy = ('$v') WHERE USER = '$user'"
             }
 
 			proc changejam {user v} {
-                zdb eval {INSERT OR REPLACE INTO users (user, jam) VALUES (:user, :v)} -parameters [list user $user v $v]
+                zdb eval "UPDATE users SET jam = ('$v') WHERE USER = '$user'"
             }
 
             proc changeammo {user v} {
-                zdb eval {INSERT OR REPLACE INTO users (user, ammo) VALUES (:user, :v)} -parameters [list user $user v $v]
+                zdb eval "UPDATE users SET ammo = ('$v') WHERE USER = '$user'"
             }
 
             proc changeclips {user v} {
-                zdb eval {INSERT OR REPLACE INTO users (user, clips) VALUES (:user, :v)} -parameters [list user $user v $v]
+                zdb eval "UPDATE users SET clips = ('$v') WHERE USER = '$user'"
             }
 
             proc changemaxammo {user v} {
-                zdb eval {INSERT OR REPLACE INTO users (user, maxammo) VALUES (:user, :v)} -parameters [list user $user v $v]
+                zdb eval "UPDATE users SET maxammo = ('$v') WHERE USER = '$user'"
             }
 
             proc changemaxclips {user v} {
-                zdb eval {INSERT OR REPLACE INTO users (user, maxclips) VALUES (:user, :v)} -parameters [list user $user v $v]
+                zdb eval "UPDATE users SET maxclips = ('$v') WHERE USER = '$user'"
             }
 
             proc changehordetokens {user v} {
-                zdb eval {INSERT OR REPLACE INTO users (user, hordetokens) VALUES (:user, :v)} -parameters [list user $user v $v]
+                zdb eval "UPDATE users SET hordetokens = ('$v') WHERE USER = '$user'"
             }
 
             proc changekills {user v} {
-                zdb eval {INSERT OR REPLACE INTO users (user, kills) VALUES (:user, :v)} -parameters [list user $user v $v]
+                zdb eval "UPDATE users SET kills = ('$v') WHERE USER = '$user'"
             }
         }   
     }
