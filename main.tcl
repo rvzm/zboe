@@ -5,7 +5,8 @@
 if {[catch {source scripts/zboe/zboe-settings.tcl} err]} {
 	putlog "Error: Could not load 'scripts/zboe/zboe-settings.tcl' file.";
 }
-
+package require sqlite3;
+sqlite3 zdb "${zboe::settings::gen::sqldir}zhunt.sql" -create true -readonly false
 namespace eval zboe {
 	namespace eval binds {
 		# Main Commands
@@ -24,9 +25,9 @@ namespace eval zboe {
 	namespace eval procs {
 		# Main Command Procs
 		proc zboe:main {nick uhost hand chan text} {
-			if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "(level2) main command sent $nick $chan - $text"; }
+			if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "main command sent| $nick $chan - $text"; }
 			set v1 [lindex [split $text] 0]
-			if {${zboe::settings::debug} == "2"} { zboe::util::zboedbg "main command var 1 set"; }
+			if {${zboe::settings::debug} == "2"} { zboe::util::zboedbg "(level2) main command var 1 set"; }
 			set v2 [lindex [split $text] 1]
 			if {${zboe::settings::debug} == "2"} { zboe::util::zboedbg "(level2) main command var 2 set"; }
 			set v3 [lindex [split $text] 2]
@@ -37,21 +38,24 @@ namespace eval zboe {
 			}
 			if {$v1 == "hunt"} {
 				if {${zboe::settings::debug} == "2"} { zboe::util::zboedbg "(level2) main command recieved control for hunt - $v2"; }
-				if {[file exists "scripts/zboe/zhunt.activehunt"] == 0} { zboe::util::init.zboe; }
 				if {$v2 == "start"} {
-					set zha "[zboe::util::read_db zhunt.activehunt]"
+					if {${zboe::settings::debug} == "2"} { zboe::util::zboedbg "(level2) hunt start command given"; }
+					set zha "[zboe::sql::util::checksetting hunt]" 
+					if {${zboe::settings::debug} == "2"} { zboe::util::zboedbg "(level2) hunt status check completed: $zha"; }
 					if {$zha == "no"} {
-					zboe::procs::zhunt::starthunting;
-					putserv "PRIVMSG $chan :o.0.O.0.o Zombie hunt started! Keep an eye out for zombies!! o.0.O.0.o";
-					return
+						if {${zboe::settings::debug} == "2"} { zboe::util::zboedbg "(level2) hunt starting"; }
+						zboe::procs::zhunt::starthunting;
+						putserv "PRIVMSG $chan :o.0.O.0.o Zombie hunt started! Keep an eye out for zombies!! o.0.O.0.o";
+						return
 					}
 					if {$zha == "yes"} {
+						if {${zboe::settings::debug} == "2"} { zboe::util::zboedbg "(level2) hunt already going"; }
 						putserv "PRIVMSG $chan ::o.0.O.0.O There is already an active hunt o.0.O.0.o";
 						return
 					}
 				}
 				if {$v2 == "stop"} {
-					set zha "[zboe::util::read_db zhunt.activehunt]"
+					set zha "[zboe::sql::util::checksetting hunt]"
 					if {$zha == "yes"} {
 						zboe::procs::zhunt::stophunting;
 						putserv "PRIVMSG $chan :o.0.O.0.o Stopping the hunt... o.0.O.0.o";
@@ -69,23 +73,15 @@ namespace eval zboe {
 					return
 				}
 				if {$v2 == "check"} {
-					set zha "[zboe::util::read_db zhunt.activehunt]"
+					set zha "[zboe::sql::util::checksetting hunt]"
 					if {$zha == "yes"} {
 						putserv "PRIVMSG $chan :o.0.O.0.o Zombies about. Putting them away.";
-						zboe::util::write_db "zhunt.activehunt" "no";
-						zboe::util::write_db "zhunt.zombies" "0";
+						zboe::sql::util::changesetting "hunt" "no";
+						zboe::sql::util::changesetting "zombiecount" "0";
 						zboe::procs::zhunt::stophunting;
 						return
 					}
 					putserv "PRIVMSG $chan :o.0.O.0.o No stray zombies";
-					return
-				}
-				if {$v2 == "zgo"} {
-					if {[file exists "zhunt.$nick.xp"] == 0} { zboe::util::write_db "zhunt.$nick.xp" "0"; }
-					if {[file exists "zhunt.$nick.ammo"] == 0} { zboe::util::write_db "zhunt.$nick.ammo" "6"; }
-					if {[file exists "zhunt.$nick.clips.a1"] == 0} { zboe::util::write_db "zhunt.$nick.clips.a1" "3"; }
-					if {[file exists "zhunt.$nick.jam"] == 0} { zboe::util::write_db "zhunt.$nick.jam" "no"; }
-					putserv "PRIVMSG $chan :o.0.O.0.o. All set to hunt!";
 					return
 				}
 			}
@@ -119,24 +115,21 @@ namespace eval zboe {
 			if {$v1 == "info"} { putserv "PRIVMSG $chan :zboe.tcl running version [zboe::util::getVersion]"; return }
 			if {$v1 == "z"} { putserv "PRIVMSG $chan :o.0.O.0.o Rolling Encounter..."; zboe::procs::zhunt::zspawn; return }
 			if {$v1 == "zc"} {
-				set zcz "[zboe::util::read_db zhunt.zombies]";
-				set zcah "[zboe::util::read_db zhunt.activehunt]";
-				set zcam "[zboe::util::read_db zhunt.$nick.ammo]";
-				set zcxp "[zboe::util::read_db zhunt.$nick.xp]";
-				set zccl "[zboe::util::read_db zhunt.$nick.clips.a1]";
-				set zcht "[zboe::util::read_db zhunt.$nick.htok]";
-				set zcxl "[zboe::util::read_db zhunt.$nick.level]";
-				putserv "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Check|| Active: $zcah | Zombies: $zcz | Your Level: $zcxl| Your Ammo/Clips: $zcam/zccl | Your XP: $zcxp | Horde Tokens: $zcht";
+				set zccz "[zboe::sql::util::checksetting zombiecount]";
+				set zcah "[zboe::sql::util::checksetting hunt]";
+				set zcam "[zboe::sql::util::checkammo $nick]";
+				set zcxp "[zboe::sql::util::checkxp $nick]";
+				set zccl "[zboe::sql::util::checkclips $nick]";
+				set zcht "[zboe::sql::util::checkhordetokens $nick]";
+				set zcxl "[zboe::sql::util::checklevel $nick]";
+				putserv "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Check|| Active: $zcah | Zombies: $zccz | Your Level: $zcxl| Your Ammo/Clips: $zcam/zccl | Your XP: $zcxp | Horde Tokens: $zcht";
 				return
 			}
-			if {$v1 == "zr"} {
-				putserv "NOTICE $nick :zboe||control /!\\ RESETTING ZHUNT /!\\ "
-				zboe::procs::zhunt::stophunting;
-				zboe::util::write_db "zhunt.activehunt" "no"
-				zboe::util::write_db "zhunt.zombies" "0"
-				zboe::util::write_db "zhunt.horde" "no"
-				file delete -force -- {*}[glob scripts/zboe/zhunt.*]
-				putserv "PRIVMSG $chan :o.0.O.0.o /!\\ ZHUNT HAS BEEN RESET. All player data erased.";
+			if {$v1 == "init"} {
+				putserv "NOTICE $nick :zboe||control /!\\ INITIALIZING ZHUNT /!\\ "
+				zboe::sql::util::initdb
+				zboe::sql::util::dbmake "$nick"
+				putserv "PRIVMSG $chan :o.0.O.0.o /!\\ zHunt Initialized";
 				return
 			}
 			putcmdlog "*** zboe controller $nick - help command error - no if statement triggered"
@@ -160,11 +153,11 @@ namespace eval zboe {
 			if {$nick == "zboe"} {
 				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|log| Joined $chan"; }
 				if {$chan == ${zboe::settings::gen::homechan}} {
-					if {${zboe::settings::hunt::startonjoin} == "yes"} { 
-						zboe::util::write_db "zhunt.activehunt" "yes";
-						zboe::util::write_db "zhunt.zombies" "0";
+					if {${zboe::settings::hunt::startonjoin} == "yes"} {
+						zboe::sql::util::changesetting "hunt" "yes";
+						zboe::sql::util::changesetting "zombiecount" "0";
+						zboe::sql::util::changesetting "fullhorde" "no";
 						zboe::procs::zhunt::starthunting;
-						if {[file exists "scripts/zboe/zhunt.horde"] == 0} { zboe::util::write_db "zhunt.horde" "no"; }
 						putserv "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Starting... o.0.O.0.o";
 						zboe::procs::zhunt::zspawn;
 						return
@@ -173,10 +166,10 @@ namespace eval zboe {
 				return
 			}
 			if {$chan == ${zboe::settings::gen::homechan}} {
-				if {[file exists "zhunt.$nick.xp"] == 0} { zboe::util::init.nick $nick; }
-				if {[zboe::util::read_db "zhunt.activehunt"] == "yes"} { putserv "PRIVMSG $chan :o.0.O.0.o. There is currently an active hunt! there are [zboe::util::read_db "zhunt.zombies"] zombies around currently. || use ${zboe::settings::gen::pubtrig}shoot and ${zboe::settings::gen::pubtrig}reload"; }
-				if {[zboe::util::read_db "zhunt.horde"] == "yes"} {
-					if {[zboe::util::read_db "zhunt.zombies"] == ${zboe::settings::hunt::maxhorde}} { putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! The horde is currently at MAX STRENGTH!!"; return }
+				if {[zboe::sql::util::checkxp $nick] == 0} { zboe::sql::util::dbmake "$nick"; }
+				if {[zboe::sql::util::checksetting "hunt"] == "yes"} { putserv "PRIVMSG $chan :o.0.O.0.o. There is currently an active hunt! there are [zboe::sql::util::checksetting "zombiecount"] zombies around currently. || use ${zboe::settings::gen::pubtrig}shoot and ${zboe::settings::gen::pubtrig}reload"; }
+				if {[zboe::sql::util::changesetting "fullhorde"] == "yes"} {
+					if {[zboe::sql::util::checksetting "zombiecount"] == ${zboe::settings::hunt::maxhorde}} { putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! The horde is currently at MAX STRENGTH!!"; return }
 					putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! Help clear up the horde!";
 				}
 			}
@@ -184,14 +177,15 @@ namespace eval zboe {
 		namespace eval zhunt {
 			proc starthunting {} {
 				set chan ${zboe::settings::gen::homechan}
-				zboe::util::write_db "zhunt.activehunt" "yes"
-				zboe::util::write_db "zhunt.zombies" "0"
+				zboe::sql::util::changesetting "hunt" "yes"
+				zboe::sql::util::changesetting "zombiecount" "0"
 				timer ${zboe::settings::hunt::time} zboe::procs::zhunt::zspawn 0 zhunttimer
 			}
 			proc stophunting {} {
 				set chan ${zboe::settings::gen::homechan}
-				zboe::util::write_db "zhunt.activehunt" "no"
-				zboe::util::write_db "zhunt.zombies" "0"
+				zboe::sql::util::changesetting "hunt" "no"
+				zboe::sql::util::changesetting "zombiecount" "0"
+				zboe::sql::util::changesetting "fullhorde" "no"
 				killtimer zhunttimer
 			}
 			proc zspawn {} {
@@ -199,9 +193,9 @@ namespace eval zboe {
 				set chan ${zboe::settings::gen::homechan}
 				set tchk "[rand 15]"
 				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "zcheck $tchk"; }
-				set zha "[zboe::util::read_db zhunt.activehunt]"
-				set znum "[zboe::util::read_db zhunt.zombies]"
-				set zsph "[zboe::util::read_db zhunt.horde]"
+				set zha "[zboe::sql::util::checksetting hunt]"
+				set znum "[zboe::sql::util::checksetting zombiecount]"
+				set zsph "[zboe::sql::util::checksetting fullhorde]"
 				if {$tchk <= ${zboe::settings::hunt::trigger}} {
 					incr znum
 					if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "DER BE ZOMBIES"; }
@@ -221,11 +215,9 @@ namespace eval zboe {
 							return
 						}
 						if {$znum == ${zboe::settings::hunt::maxhorde}} { putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * Horde now at MAX STRENGTH!!"; } else { putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * Multiple zombies now infesting the area. | Zombies: $znum "}
-						if {[file exists "scripts/zboe/zhunt.horde"] == 0} { zboe::util::write_db "zhunt.horde" "no"; }
-						zboe::util::write_db "zhunt.horde" "yes";
+						zboe::sql::util::changesetting "fullhorde" "yes";
 					}
-					if {[file exists "zhunt.zombies"] == 0} { zboe::util::write_db "zhunt.zombies" "1"; }
-					zboe::util::write_db "zhunt.zombies" $znum;
+					zboe::sql::util::changesetting "zombiescount" $znum;
 					return
 				}
 				if {${zboe::settings::hunt::roast} == "yes"} { putserv "PRIVMSG $chan :o.0.O.0.o You lucky fucks, a zombie almost entered, but wandered away"; }
@@ -234,78 +226,77 @@ namespace eval zboe {
 			proc stats {nick uhost hand chan text} {
 				set v1 [lindex [split $text] 0]
 				if {$v1 != ""} {
-					set zsxfg "scripts/zboe/zhunt.$v1.xp";
 					set zget "$v1";
 					set zcol "$v1's";
 				}
 				if {$v1 == ""} { set zget $nick; set zcol "Your"; }
-				if {[file exists "scripts/zboe/zhunt.$nick.xp"] == 0} { zboe::util::init.nick $nick; }
-				if {[file exists "scripts/zboe/zhunt.zombies"] == 0} { zboe::util::init.zboe; }
-				set zcz "[zboe::util::read_db zhunt.zombies]";
-				set zcah "[zboe::util::read_db zhunt.activehunt]";
-				set zcam "[zboe::util::read_db zhunt.$zget.ammo]";
-				set zcxp "[zboe::util::read_db zhunt.$zget.xp]";
-				set zccl "[zboe::util::read_db zhunt.$zget.clips.a1]";
-				set zcht "[zboe::util::read_db zhunt.$zget.htok]";
-				set zcxl "[zboe::util::read_db zhunt.$zget.level]";
-				set zcpj "[zboe::util::read_db zhunt.$zget.jam]";
-				set zcma "[zboe::util::read_db zhunt.$zget.maxammo]";
-				set zcmc "[zboe::util::read_db zhunt.$zget.maxclip.a1]";
-				set zcmac "[zboe::util::read_db zhunt.$zget.maxacc]";
+				zboe::sql::util::dbmake "$zget";
+				set zcz "[zboe::sql::util::checksetting zombiecount]";
+				set zcah "[zboe::sql::util::checksetting hunt]";
+				set zcam "[zboe::sql::util::checkammo $zget]";
+				set zcxp "[zboe::sql::util::checkxp $zget]";
+				set zccl "[zboe::sql::util::checkclips $zget]";
+				set zcht "[zboe::sql::util::checkhordetokens $zget]";
+				set zcxl "[zboe::sql::util::checklevel $zget]";
+				set zcpj "[zboe::sql::util::checkjam $zget]";
+				set zcma "[zboe::sql::util::checkmaxammo $zget]";
+				set zcmc "[zboe::sql::util::checkmaxclips $zget]";
+				set zcmac "[zboe::sql::util::checkaccuracy $zget]";
 				putserv "PRIVMSG $chan :||Zombie Hunt || $zget | $zcol Level: $zcxl | $zcol XP: $zcxp | $zcol Ammo/Clips: $zcam/$zccl";
 				putserv "PRIVMSG $chan :||Stats o.0.o || Horde Tokens: $zcht | Max Accuracy: $zcmac | Clip Size: $zcma | Max Clips: $zcmc | Gun Jam: $zcpj";
 				return
 			}
 			proc reload {nick uhost hand chan text} {
-				if {[file exists "scripts/zboe/zhunt.$nick.xp"] == 0} { zboe::util::init.nick $nick; }
-				set zpam "[zboe::util::read_db zhunt.$nick.ammo]"
-				set zrl "[zboe::util::read_db zhunt.$nick.clips.a1]";
-				set zrma "[zboe::util::read_db zhunt.$nick.maxammo]";
+				zboe::sql::util::dbmake "$nick"
+				set zpam "[zboe::sql::util::checkammo $nick]"
+				set zrl "[zboe::sql::util::checkclips $nick]";
+				set zrma "[zboe::sql::util::checkmaxammo $nick]";
 				if {$zpam >= 1} { putserv "PRIVMSG $chan :errr! your clip isnt empty!"; return }
 				if {$zrl == 0} { putserv "PRIVMSG $chan :errr! You have no clips!"; return }
-				zboe::util::write_db "zhunt.$nick.ammo" "$zrma"
+				zboe::sql::util::changeammo "$nick" "$zrma"
 				incr zrl -1
-				zboe::util::write_db "zhunt.$nick.clips.a1" "$zrl"
+				zboe::sql::util::changeclips "$nick" "$zrl"
 				putserv "PRIVMSG $chan :o.0.O.0.o Reloaded bitch! (Clips left: $zrl)";
 				return;
 			}
 			proc shoot {nick uhost hand chan text} {
 				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "shoot command sent $nick $chan"; }
-				if {[file exists "scripts/zboe/zhunt.activehunt"] == 0} { zboe::util::init.zboe; }
-				set zschk "[zboe::util::read_db zhunt.activehunt]"
-				set zaz "[zboe::util::read_db zhunt.zombies]"
+				set zschk "[zboe::sql::util::checksetting hunt]"
+				set zaz "[zboe::sql::util::checksetting zombiecount]"
+				set zakc "[zboe::sql::util::checkkills $nick]"
 				if {$zschk == "yes"} {
-					if {[file exists "scripts/zboe/zhunt.$nick.xp"] == 0} { zboe::util::init.nick $nick; }
-					set zpam "[zboe::util::read_db zhunt.$nick.ammo]"
+					if {[zboe::sql::util::checkxp "$nick"] == 0} { zboe::util::init.nick $nick; }
+					set zpam "[zboe::sql::util::checkammo $nick]"
 					if {$zaz >= "1"} {
 						if {$zpam == "0"} {
 							putserv "PRIVMSG $chan :o.0.O.0.o errr! you need to reload dipshit!";
 							return
 						}
 						incr zpam -1
-						set zpacc "[zboe::util::read_db zhunt.$nick.maxacc]"
+						set zpacc "[zboe::sql::util::checkaccuracy $nick]"
+						set zpx "[zboe::sql::util::checkaccuracy $nick]"
 						set zpchk "[rand 99]"
-						set zpf zhunt.$nick.xp
-						set zpx "[zboe::util::read_db $zpf]"
 						if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "shoot $nick / ammo $zpam / xp $zpx "; }
-						zboe::util::write_db "zhunt.$nick.ammo" $zpam
+						zboe::sql::util::changeammo "$nick" $zpam
 						if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "shoot acc: $zpacc check: $zpchk "; }
 						if {$zpchk <= $zpacc} {
 							putserv "PRIVMSG $chan :o.0.O.0.o ayyy $nick hit the zombie!! They get 5xp |$zpam/6|"
 							incr zpx 5
 							incr zaz -1
-							zboe::util::write_db "zhunt.$nick.xp" $zpx
-							zboe::util::write_db "zhunt.zombies" $zaz
+							incr zakc
+							zboe::sql::util::changexp "$nick" $zpx
+							zboe::sql::util::changesetting "zombiecount" $zaz
+							zboe::sql::util::changekills "$nick" $zakc
 							if {${zboe::settings::hunt::horde} == "yes"} {
 								if {$zaz == "0"} {
-									if {[zboe::util::read_db zhunt.horde] == "yes"} {
+									if {[zboe::sql::util::checksetting "fullhorde"] == "yes"} {
 										putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! * * * HORDE ELIMINATED (+35 XP | +1 Horde Token) * * *";
-										set zsht "[zboe::util::read_db zhunt.$nick.htok]"
+										set zsht "[zboe::sql::util::checkhordetokens $nick]"
 										incr zpx "35"
 										incr zsht
-										zboe::util::write_db "zhunt.$nick.htok" $zsht
-										zboe::util::write_db "zhunt.$nick.xp" $zpx
-										zboe::util::write_db "zhunt.horde" "no"
+										zboe::sql::util::changehordetokens "$nick" $zsht
+										zboe::sql::util::changexp "$nick" $zpx
+										zboe::sql::util::changesetting "fullhorde" "no"
 									}
 									return; 
 								}
@@ -329,23 +320,21 @@ namespace eval zboe {
 				if {$v1 == ""} {
 					putserv "PRIVMSG $chan :o.0.O.0.o zboe Shop - use ${zboe::settings::gen::pubtrig}shop <item number>"
 					putserv "PRIVMSG $chan :Current Items: (1) Clip (${zboe::settings::shop::clips}xp) | (2) LevelUp! (${zboe::settings::shop::lvlup} horde tokens) | (3) Accuracy Up! (${zboe::settings::shop::accuracyupgrade} horde tokens) | (4) Horde Token (${zboe::settings::shop::hordetokens}xp) | (5) Clip Storage Upgrade (${zboe::settings::shop::clipupgrade} Horde Tokens) | (arsenal) display the Arsenal Shop"; return }
-				if {[file exists "scripts/zboe/zhunt.$nick.xp"] == 0} { zboe::util::init.nick $nick; }
-				set zshop "[zboe::util::read_db zhunt.$nick.clips.a1]"
-				set zspx "[zboe::util::read_db zhunt.$nick.xp]"
-				set zsmc "[zboe::util::read_db zhunt.$nick.maxclip.a1]"
-				set zspl "[zboe::util::read_db zhunt.$nick.level]"
-				set zsac "[zboe::util::read_db zhunt.$nick.maxacc]"
+				if {[zboe::sql::util::checkxp $nick] == 0} { zboe::sql::util::dbmake "$nick"; }
+				set zscl "[zboe::sql::util::checkclips $nick]"
+				set zspx "[zboe::sql::util::checkxp $nick]"
+				set zsmc "[zboe::sql::util::checkmaxclips $nick]"
+				set zspl "[zboe::sql::util::checklevel $nick]"
+				set zsac "[zboe::sql::util::checkaccuracy $nick]"
+				set zsht "[zboe::sql::util::checkhordetokens $nick]"
 				if {$v1 == "1"} {
-					set zshop "[zboe::util::read_db zhunt.$nick.clips.a1]"
-					set zspx "[zboe::util::read_db zhunt.$nick.xp]"
-					set zsmc "[zboe::util::read_db zhunt.$nick.maxclip.a1]"
 					if {$zspx >= ${zboe::settings::shop::clips}} {
-						if {$zshop < $zsmc} {
-							incr zshop
+						if {$zscl < $zsmc} {
+							incr zscl
 							incr zspx "-${zboe::settings::shop::clips}"
-							zboe::util::write_db "zhunt.$nick.clips.a1" "$zshop";
-							zboe::util::write_db "zhunt.$nick.xp" "$zspx";
-							putserv "NOTICE $nick :o.0.O.0.o You purchased a clip, you now have $zshop/$zsmc clips";
+							zboe::sql::util::changeclips "$nick" "$zscl";
+							zboe::sql::util::changexp "$nick" "$zspx";
+							putserv "NOTICE $nick :o.0.O.0.o You purchased a clip, you now have $zscl/$zsmc clips";
 							return
 						} else { putserv "NOTICE $nick :o.0.O.0.o errr, you are at your max clips!"; return }
 					}
@@ -353,19 +342,15 @@ namespace eval zboe {
 					return
 				}
 				if {$v1 == "2"} {
-					set zsht "[zboe::util::read_db zhunt.$nick.htok]"
 					if {$zsht >= ${zboe::settings::shop::lvlup}} {
-						set zspl "[zboe::util::read_db zhunt.$nick.level]"
-						set zsac "[zboe::util::read_db zhunt.$nick.maxacc]"
-						set zsmc "[zboe::util::read_db zhunt.$nick.maxclip.a1]"
 						incr zsht "-${zboe::settings::shop::lvlup}"
 						incr zspl
 						incr zsac 5
 						incr zsmc 
-						zboe::util::write_db "zhunt.$nick.level" "$zspl"
-						zboe::util::write_db "zhunt.$nick.htok" "$zsht"
-						zboe::util::write_db "zhunt.$nick.maxacc" "$zsac"
-						zboe::util::write_db "zhunt.$nick.maxclip.a1" "$zsmc";
+						zboe::sql::util::changelevel "$nick" "$zspl"
+						zboe::sql::util::changehordetokens "$nick" "$zsht"
+						zboe::sql::util::changeaccuracy "$nick" "$zsac"
+						zboe::sql::util::changemaxclips "$nick" "$zsmc";
 						putserv "NOTICE $nick :o.0.O.0.o You leveled up to Level $zspl!";
 						return
 					}
@@ -373,13 +358,11 @@ namespace eval zboe {
 					return
 				}
 				if {$v1 == "3"} {
-					set zsht "[zboe::util::read_db zhunt.$nick.htok]"
 					if {$zsht >= ${zboe::settings::shop::accuracyupgrade}} {
-						set zsacc "[zboe::util::read_db zhunt.$nick.maxacc]"
 						incr zsht "-${zboe::settings::shop::accuracyupgrade}"
-						incr zsacc 5
-						zboe::util::write_db "zhunt.$nick.htok" "$zsht"
-						zboe::util::write_db "zhunt.$nick.maxacc" "$zsacc"
+						incr zsac 5
+						zboe::sql::util::changehordetokens "$nick" "$zsht"
+						zboe::sql::util::changeaccuracy "$nick" "$zsac"
 						putserv "NOTICE $nick :o.0.O.0.o Max Accuracy inreased to $zsacc";
 						return
 					}
@@ -387,13 +370,11 @@ namespace eval zboe {
 					return
 				}
 				if {$v1 == "4"} {
-					set zspx "[zboe::util::read_db zhunt.$nick.xp]"
-					set zsht "[zboe::util::read_db zhunt.$nick.htok]"
 					if {$zspx >= ${zboe::settings::shop::hordetokens}} {
 						incr zspx "-${zboe::settings::shop::hordetokens}"
 						incr zsht
-						zboe::util::write_db "zhunt.$nick.htok" "$zsht"
-						zboe::util::write_db "zhunt.$nick.xp" "$zspx"
+						zboe::sql::util::changehordetokens "$nick" "$zsht"
+						zboe::sql::util::changexp "$nick" "$zspx"
 						putserv "NOTICE $nick :o.0.O.0.o You purchased a Horde Token. You now have $zsht tokens.";
 						return
 						}
@@ -401,14 +382,12 @@ namespace eval zboe {
 					return
 				}
 				if {$v1 == "5"} {
-					set zsmc "[zboe::util::read_db zhunt.$nick.maxclip.a1]"
-					set zsht "[zboe::util::read_db zhunt.$nick.htok]"
 					if {$zspx >= ${zboe::settings::shop::clipupgrade}} {
 						incr zsht "-${zboe::settings::shop::clipupgrade}"
 						incr zsmc
 						putserv "NOTICE $nick :o.0.O.0.o Max Clips inreased to $zsmc";
-						zboe::util::write_db "zhunt.$nick.htok" "$zsht"
-						zboe::util::write_db "zhunt.$nick.maxclip.a1" "$zsmc"
+						zboe::sql::util::changehordetokens "$nick" "$zsht"
+						zboe::sql::util::changemaxclips "$nick" "$zsmc"
 						return
 					}
 					putserv "NOTICE $nick :o.0.O.0.o Error: You cannot afford that item!";
@@ -438,26 +417,6 @@ namespace eval zboe {
 		}
 	}
 	namespace eval util {
-		# write to *.db files
-		proc write_db {w_db w_info} {
-			set dbf "scripts/zboe/$w_db"
-			if {[file exists $dbf] == 0} {
-				set crtdb [open $dbf a+]
-				puts $crtdb "$w_info"
-				close $crtdb
-			}
-			set fs_write [open $dbf w]
-			puts $fs_write "$w_info"
-			close $fs_write
-		}
-		# read from *.db files
-		proc read_db {r_db} {
-			set dbr "scripts/zboe/$r_db"
-			set fs_open [open $dbr r]
-			gets $fs_open db_out
-			close $fs_open
-			return $db_out
-		}
 		proc getVersion {} {
 			global zboe::settings::version
 			return $zboe::settings::version
@@ -470,29 +429,128 @@ namespace eval zboe {
 			global zboe::settings::release
 			return $zboe::settings::release
 		}
-		proc init.nick {nick} {
-		putcmdlog "*** zboe|users| initializing $nick";
-		zboe::util::write_db "zhunt.$nick.xp" "0";
-		zboe::util::write_db "zhunt.$nick.ammo" "6";
-		zboe::util::write_db "zhunt.$nick.clips.a1" "3";
-		zboe::util::write_db "zhunt.$nick.clips.a2" "3";
-		zboe::util::write_db "zhunt.$nick.clips.a3" "3";
-		zboe::util::write_db "zhunt.$nick.jam" "no";
-		zboe::util::write_db "zhunt.$nick.htok" "0";
-		zboe::util::write_db "zhunt.$nick.level" "1";
-		zboe::util::write_db "zhunt.$nick.maxammo" "6";
-		zboe::util::write_db "zhunt.$nick.maxclip.a1" "3";
-		zboe::util::write_db "zhunt.$nick.maxclip.a2" "3";
-		zboe::util::write_db "zhunt.$nick.maxclip.a3" "3";
-		zboe::util::write_db "zhunt.$nick.maxacc" "55";
-		putcmdlog "*** zboe|users| zjoin: $nick | initialized";
-		}
-		proc init.zboe {} {
-			zboe::util::write_db "zhunt.activehunt" "no";
-			zboe::util::write_db "zhunt.zombies" "0";
-			zboe::util::write_db "zhunt.horde" "no";
-		}
 		proc zboedbg {text} { putcmdlog "** zboe\[debug\] $text"; }
 		proc act {chan text} { putserv "PRIVMSG $chan \01ACTION $text\01"; }
 	}
+	namespace eval sql {
+        namespace eval util {
+            proc dbmake {user} {
+                if {[zdb exists {SELECT xp FROM users WHERE user="$user"}] == "true"} {
+                    putcmdlog "***zboe|debug-sql|Error! Cannot create users row, it already exists."
+                    return 
+                } else {
+                    putcmdlog "***zboe|debug-sql| Creating user $user row"
+                    zdb eval {INSERT INTO users VALUES($user, 0, 1, 0, 55, "no", 6, 3, 6, 3, 0)} -parameters [list user $user]
+					putcmdlog "***zboe|debug-sql| User row $user Created"
+                }
+            }
+
+            proc initdb {} {
+				putcmdlog "***zboe|debug-sql| initializing sql"
+                zdb eval {CREATE TABLE settings(hunt TEXT, zombiecount INTEGER, fullhorde TEXT)}
+                zdb eval {INSERT INTO settings VALUES('no', 0, 'no')}
+				zdb eval {CREATE TABLE users(user TEXT, xp INTEGER, level INTEGER, kills INTEGER, accuracy INTEGER, jam TEXT, ammo INTEGER, clips INTEGER, maxammo INTEGER, maxclips INTEGER, hordetokens INTEGER)}
+				putcmdlog "***zboe|debug-sql| SQL Database initialized"
+            }
+
+            proc checksetting {sett} {
+                set zhnt [zdb eval {SELECT $sett FROM settings}]
+                return $zhnt
+            }
+
+            proc changesetting {sett v} {
+                zdb eval {INSERT OR REPLACE INTO settings (settings, :sett) VALUES (:sett, :v)} -parameters [list sett $sett v $v]
+            }
+
+            proc checkxp {user} {
+                set zdbrt [zdb eval {SELECT xp FROM users WHERE user=:user} -parameters [list user $user]]
+                return $zdbrt
+            }
+
+			proc checkaccuracy {user} {
+                set zdbrt [zdb eval {SELECT accuracy FROM users WHERE user=:user} -parameters [list user $user]]
+                return $zdbrt
+            }
+
+			proc checkjam {user} {
+                set zdbrt [zdb eval {SELECT jam FROM users WHERE user=:user} -parameters [list user $user]]
+                return $zdbrt
+            }
+
+            proc checklevel {user} {
+                set zdbrt [zdb eval {SELECT level FROM users WHERE user=:user} -parameters [list user $user]]
+                return $zdbrt
+            }
+
+            proc checkammo {user} {
+                set zdbrt [zdb eval {SELECT ammo FROM users WHERE user=:user} -parameters [list user $user]]
+                return $zdbrt
+            }
+
+            proc checkclips {user} {
+                set zdbrt [zdb eval {SELECT clips FROM users WHERE user=:user} -parameters [list user $user]]
+                return $zdbrt
+            }
+
+            proc checkmaxammo {user} {
+                set zdbrt [zdb eval {SELECT maxammo FROM users WHERE user=:user} -parameters [list user $user]]
+                return $zdbrt
+            }
+
+            proc checkmaxclips {user} {
+                set zdbrt [zdb eval {SELECT maxclips FROM users WHERE user=:user} -parameters [list user $user]]
+                return $zdbrt
+            }
+
+            proc checkhordetokens {user} {
+                set zdbrt [zdb eval {SELECT hordetokens FROM users WHERE user=:user} -parameters [list user $user]]
+                return $zdbrt
+            }
+
+            proc checkkills {user} {
+                set zdbrt [zdb eval {SELECT kills FROM users WHERE user=:user} -parameters [list user $user]]
+                return $zdbrt
+            }
+
+            proc changexp {user v} {
+                zdb eval {INSERT OR REPLACE INTO users (user, xp) VALUES (:user, :v)} -parameters [list user $user v $v]
+            }
+
+            proc changelevel {user v} {
+                zdb eval {INSERT OR REPLACE INTO users (user, level) VALUES (:user, :v)} -parameters [list user $user v $v]
+            }
+
+			proc changeaccuracy {user v} {
+                zdb eval {INSERT OR REPLACE INTO users (user, accuracy) VALUES (:user, :v)} -parameters [list user $user v $v]
+            }
+
+			proc changejam {user v} {
+                zdb eval {INSERT OR REPLACE INTO users (user, jam) VALUES (:user, :v)} -parameters [list user $user v $v]
+            }
+
+            proc changeammo {user v} {
+                zdb eval {INSERT OR REPLACE INTO users (user, ammo) VALUES (:user, :v)} -parameters [list user $user v $v]
+            }
+
+            proc changeclips {user v} {
+                zdb eval {INSERT OR REPLACE INTO users (user, clips) VALUES (:user, :v)} -parameters [list user $user v $v]
+            }
+
+            proc changemaxammo {user v} {
+                zdb eval {INSERT OR REPLACE INTO users (user, maxammo) VALUES (:user, :v)} -parameters [list user $user v $v]
+            }
+
+            proc changemaxclips {user v} {
+                zdb eval {INSERT OR REPLACE INTO users (user, maxclips) VALUES (:user, :v)} -parameters [list user $user v $v]
+            }
+
+            proc changehordetokens {user v} {
+                zdb eval {INSERT OR REPLACE INTO users (user, hordetokens) VALUES (:user, :v)} -parameters [list user $user v $v]
+            }
+
+            proc changekills {user v} {
+                zdb eval {INSERT OR REPLACE INTO users (user, kills) VALUES (:user, :v)} -parameters [list user $user v $v]
+            }
+        }   
+    }
 }

@@ -3,11 +3,12 @@ namespace eval zboe {
 		variable version "0.2"
 		variable build "082703"
 		variable release "r1"
-		variable debug "1"
+		variable debug "2"
 		namespace eval gen {
 			variable pubtrig "@"
 			variable controller "~z"
 			variable homechan "#bots"
+			variable sqldir "~/public_html/wh0r3.insomnia247.nl/zhunt/"
 		}
 		namespace eval hunt {
 			variable trigger "8"
