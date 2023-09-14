@@ -110,6 +110,7 @@ namespace eval zboe {
 			if {$v1 == "restart"} { restart; return }
 			if {$v1 == "die"} { die; return }
 			if {$v1 == "info"} { putserv "PRIVMSG $chan :zboe.tcl running version [zboe::util::getVersion]"; return }
+			if {$v1 == "chanset"} { channel set $chan "$v2"; return }
 			if {$v1 == "z"} { putserv "PRIVMSG $chan :o.0.O.0.o Rolling Encounter..."; zboe::procs::zhunt::zspawn; return }
 			if {$v1 == "zc"} {
 				set zccz "[zboe::sql::util::checksetting zombiecount]";
@@ -151,6 +152,15 @@ namespace eval zboe {
 				if {${zboe::settings::debug} >= "1"} { putcmdlog "*** zboe|log| Joined $chan"; }
 				if {$chan == ${zboe::settings::gen::homechan}} {
 					if {${zboe::settings::hunt::startonjoin} == "yes"} {
+						if {[zboe::sql::util::checksetting "hunt"] == "yes"} {
+							putserv "PRIVMSG $chan :o.0.O.0.o. There is currently an active hunt! there are [zboe::sql::util::checksetting "zombiecount"] zombies around currently. || use ${zboe::settings::gen::pubtrig}shoot and ${zboe::settings::gen::pubtrig}reload";
+							if {[zboe::sql::util::checksetting "fullhorde"] == "yes"} {
+								if {[zboe::sql::util::checksetting "zombiecount"] == ${zboe::settings::hunt::maxhorde}} { putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! The horde is currently at MAX STRENGTH!!"; return }
+								putserv "PRIVMSG $chan :o.0.O.0.o !!! ZOMBIE HORDE !!! Help clear up the horde!";
+							}
+							timer ${zboe::settings::hunt::time} zboe::procs::zhunt::zspawn 0 zhunttimer
+							return
+						}
 						zboe::sql::util::changesetting "hunt" "yes";
 						zboe::sql::util::changesetting "zombiecount" "0";
 						zboe::sql::util::changesetting "fullhorde" "no";
@@ -175,7 +185,6 @@ namespace eval zboe {
 			proc starthunting {} {
 				set chan ${zboe::settings::gen::homechan}
 				zboe::sql::util::changesetting "hunt" "yes"
-				zboe::sql::util::changesetting "zombiecount" "0"
 				timer ${zboe::settings::hunt::time} zboe::procs::zhunt::zspawn 0 zhunttimer
 			}
 			proc stophunting {} {
@@ -376,7 +385,7 @@ namespace eval zboe {
 						incr zsac 5
 						zboe::sql::util::changehordetokens "$nick" "$zsht"
 						zboe::sql::util::changeaccuracy "$nick" "$zsac"
-						putserv "NOTICE $nick :o.0.O.0.o Max Accuracy inreased to $zsacc";
+						putserv "NOTICE $nick :o.0.O.0.o Max Accuracy inreased to $zsac";
 						return
 					}
 					putserv "NOTICE $nick :o.0.O.0.o Error: You cannot afford that item!";
