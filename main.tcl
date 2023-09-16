@@ -645,7 +645,12 @@ namespace eval zboe {
                 set zdbrt "[zdb eval {SELECT * FROM users WHERE user=$user}]"
                 return [lindex [split $zdbrt] 3]
             }
-
+			proc checkuser {user set} {
+				set zdbrt [jdb eval "SELECT $set FROM users WHERE user=$user"]
+			}
+			proc changeuser {user set v} {
+				zdb eval "UPDATE users SET $set = ('$v') WHERE user = '$user'"
+			}
             proc changexp {user v} {
 				zdb eval "UPDATE users SET xp = ('$v') WHERE user = '$user'"
             }
