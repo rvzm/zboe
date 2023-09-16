@@ -29,6 +29,7 @@ namespace eval zboe {
 		# Main Command Procs
 		proc zboe:main {nick uhost hand chan text} {
 			if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "main command sent| $nick $chan - $text"; }
+			if {![channel get $chan hunt]} { putserv "PRIVMSG $chan : :o.0.O.0.o Err - This channel is not participating in the hunt."; return }
 			set v1 [lindex [split $text] 0]
 			set v2 [lindex [split $text] 1]
 			set v3 [lindex [split $text] 2]
@@ -234,6 +235,7 @@ namespace eval zboe {
 			}
 			proc stats {nick uhost hand chan text} {
 				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "stats command issued"; }
+				if {![channel get $chan hunt]} { putserv "PRIVMSG $chan : :o.0.O.0.o Err - This channel is not participating in the hunt."; return }
 				set v1 [lindex [split $text] 0]
 				if {$v1 != ""} {
 					set zget "$v1";
@@ -276,6 +278,7 @@ namespace eval zboe {
 			}
 			proc reload {nick uhost hand chan text} {
 				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "Reload: DB Check"; }
+				if {![channel get $chan hunt]} { putserv "PRIVMSG $chan : :o.0.O.0.o Err - This channel is not participating in the hunt."; return }
 				zboe::sql::util::dbmake "$nick"
 				set zpam "[zboe::sql::util::checkammo $nick]"
 				set zrl "[zboe::sql::util::checkclips $nick]";
@@ -293,6 +296,7 @@ namespace eval zboe {
 			}
 			proc shoot {nick uhost hand chan text} {
 				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "shoot command sent $nick $chan"; }
+				if {![channel get $chan hunt]} { putserv "PRIVMSG $chan : :o.0.O.0.o Err - This channel is not participating in the hunt."; return }
 				zboe::sql::util::dbmake "$nick"
 				set zschk "[zboe::sql::util::checksetting hunt]"
 				set zaz "[zboe::sql::util::checksetting zombiecount]"
@@ -388,6 +392,7 @@ namespace eval zboe {
 				return
 			}
 			proc shop {nick uhost hand chan text} {
+				if {![channel get $chan hunt]} { putserv "PRIVMSG $chan : :o.0.O.0.o Err - This channel is not participating in the hunt."; return }
 				set v1 [lindex [split $text] 0]
 				set v2 [lindex [split $text] 1]
 				if {$v1 == ""} {
