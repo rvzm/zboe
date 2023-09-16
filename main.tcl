@@ -397,8 +397,12 @@ namespace eval zboe {
 				set v2 [lindex [split $text] 1]
 				if {$v1 == ""} {
 					putserv "PRIVMSG $chan :o.0.O.0.o zboe Shop - use ${zboe::settings::gen::pubtrig}shop <item number>"
-					putserv "PRIVMSG $chan :Current Items: (1) Clip (${zboe::settings::shop::clips}xp) | (2) LevelUp! (${zboe::settings::shop::lvlup} horde tokens) | (3) Accuracy Up! (${zboe::settings::shop::accuracyupgrade} horde tokens) | (4) Horde Token (${zboe::settings::shop::hordetokens}xp) | (5) Clip Storage Upgrade (${zboe::settings::shop::clipupgrade} Horde Tokens) | (arsenal) display the Arsenal Shop"; return }
-				if {[zboe::sql::util::checkxp $nick] == 0} { zboe::sql::util::dbmake "$nick"; }
+					putserv "NOTICE $nick :(1) Clip (${zboe::settings::shop::clips}xp) | (2) LevelUp! (${zboe::settings::shop::lvlup} horde tokens) | (3) Accuracy Up! (${zboe::settings::shop::accuracyupgrade} horde tokens) | (4) Horde Token (${zboe::settings::shop::hordetokens}xp)"
+					putserv "NOTICE $nick :(5) Clip Storage Upgrade (${zboe::settings::shop::clipupgrade} Horde Tokens) | (6) Grease \[increase gun condition\] (${zboe::settings::shop::gungrease} XP) | (7) New Gun (${zboe::settings::shop::newgun} XP)"
+					putserv "NOTICE $nick :(arsenal) display the Arsenal Shop"
+					return 
+				}
+				if {[zboe::sql::util::checkxp $nick] == 0} { zboe::sql::util::dbmake "$nick" }
 				set zscl "[zboe::sql::util::checkclips $nick]"
 				set zspx "[zboe::sql::util::checkxp $nick]"
 				set zsmc "[zboe::sql::util::checkmaxclips $nick]"
