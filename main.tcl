@@ -17,7 +17,7 @@ namespace eval zboe {
 		bind pub - ${zboe::settings::gen::pubtrig}shoot zboe::procs::zhunt::shoot
 		bind pub - ${zboe::settings::gen::pubtrig}shop zboe::procs::zhunt::shop
 		bind pub - ${zboe::settings::gen::pubtrig}reload zboe::procs::zhunt::reload
-		bind pub - ${zboe::settings::gen::pubtrig}zstats zboe::procs::zhunt::stats
+		bind pub - ${zboe::settings::gen::pubtrig}zstats zboe::procs::zhunt::zstats
 		bind pub - ${zboe::settings::gen::pubtrig}stats zboe::procs::zhunt::stats
 		# Owner Commands
 		bind pub m ${zboe::settings::gen::controller} zboe::procs::control
@@ -258,6 +258,19 @@ namespace eval zboe {
 				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "(level2) Sending Stats"; }
 				putserv "PRIVMSG $chan :||Zombie Hunt || $zget | $zcol Level: $zcxl | $zcol XP: $zcxp | $zcol Ammo/Clips: $zcam/$zccl";
 				putserv "PRIVMSG $chan :||Stats o.0.o || Horde Tokens: $zcht | Max Accuracy: $zcmac | Clip Size: $zcma | Max Clips: $zcmc | Gun Jam: $zcpj";
+			proc zstats {nick uhost hand chan text} {
+				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "zombiestats command issued"; }
+				if {![channel get $chan hunt]} { putserv "PRIVMSG $chan : :o.0.O.0.o Err - This channel is not participating in the hunt."; return }
+				set zccz "[zboe::sql::util::checksetting zombiecount]";
+				set zcah "[zboe::sql::util::checksetting hunt]";
+				set zchs "${zboe::settings::hunt::horde}"
+				set zcmh "${zboe::settings::hunt::maxhorde}"
+				set zczr "${zboe::settings::hunt::roast}"
+				if {$zchs == "yes"} {
+					putserv "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Check|| Active: $zcah | Roast: $zczr | Horde Mode Enabled | Max Horde Size: $zcmh | Zombies: $zccz |";
+					return
+				}
+				putserv "PRIVMSG $chan :o.0.O.0.o Zombie Hunt Check|| Active: $zcah | Roast: $zczr | No Horde - Single zombie mode | Max Horde Size: $zcmh |";
 				return
 			}
 			proc reload {nick uhost hand chan text} {
