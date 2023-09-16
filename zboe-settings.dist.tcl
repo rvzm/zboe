@@ -24,9 +24,12 @@ namespace eval zboe {
 			variable accuracyupgrade "2"
 			variable clipupgrade "10"
 			variable hordetokens "35"
+			variable gungrease "45"
+			variable newgun "105"
 		}
 		namespace eval flags {
 			setudef flag zboe
+			setudef flag hunt
 		}
 	}
 }
