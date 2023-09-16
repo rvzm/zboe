@@ -257,12 +257,16 @@ namespace eval zboe {
 				set zcht "[zboe::sql::util::checkhordetokens $zget]";
 				set zcxl "[zboe::sql::util::checklevel $zget]";
 				set zcpj "[zboe::sql::util::checkjam $zget]";
+				set zcpk "[zboe::sql::util::checkkills $zget]";
 				set zcma "[zboe::sql::util::checkmaxammo $zget]";
 				set zcmc "[zboe::sql::util::checkmaxclips $zget]";
 				set zcmac "[zboe::sql::util::checkaccuracy $zget]";
+				set zcgc "[zboe::sql::util::checkcondition $nick]"
 				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "(level2) Sending Stats"; }
-				putserv "PRIVMSG $chan :||Zombie Hunt || $zget | $zcol Level: $zcxl | $zcol XP: $zcxp | $zcol Ammo/Clips: $zcam/$zccl";
-				putserv "PRIVMSG $chan :||Stats o.0.o || Horde Tokens: $zcht | Max Accuracy: $zcmac | Clip Size: $zcma | Max Clips: $zcmc | Gun Jam: $zcpj";
+				putserv "PRIVMSG $chan :|| Zombie //// || $zget | $zcol Level: $zcxl | $zcol XP: $zcxp | $zcol Ammo/Clips: $zcam/$zccl | Gun Condition: $zcgc/100";
+				putserv "PRIVMSG $chan :||  Hunt Stats || Kills: $zcpk | Horde Tokens: $zcht | Accuracy: $zcmac | Clip Size: $zcma | Max Clips: $zcmc | Gun Jam: $zcpj";
+				return
+			}
 			proc zstats {nick uhost hand chan text} {
 				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "zombiestats command issued"; }
 				if {![channel get $chan hunt]} { putserv "PRIVMSG $chan : :o.0.O.0.o Err - This channel is not participating in the hunt."; return }
