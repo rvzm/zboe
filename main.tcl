@@ -351,7 +351,7 @@ namespace eval zboe {
 										incr zsht 1
 										if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "updating hordetokens $nick $zsht "; }
 										zboe::sql::util::changehordetokens "$nick" "$zsht"
-										if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "updating xp $nick $zpx "; }
+										if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "updating Horde-xp $nick $zpx "; }
 										zboe::sql::util::changexp "$nick" "$zpx"
 										zboe::sql::util::changesetting "fullhorde" "no"
 									}
