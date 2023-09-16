@@ -323,11 +323,11 @@ namespace eval zboe {
 						set zpacc "[zboe::sql::util::checkaccuracy $nick]"
 						set zpx "[zboe::sql::util::checkxp $nick]"
 						set zpchk "[rand 99]"
-						if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "shoot $nick / ammo $zpam / xp $zpx "; }
 						set zpjc "[rand 65]"
 						incr zagc -2
 						if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "updating condition $nick $zagc "; }
 						zboe::sql::util::changecondition "$nick" "$zagc"
+						if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "shoot $nick / ammo $zpam / xp $zpx / condition $zagc / jamchk $zpjc"; }
 						if {$zpjc >= $zagc} {
 							if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "shoot //JAM $nick"; }
 							putserv "PRIVMSG $chan :o.0.O.0.o FUCK!!! You got a jam, use @jam to unjam";
