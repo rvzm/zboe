@@ -289,11 +289,10 @@ namespace eval zboe {
 				set zpam "[zboe::sql::util::checkammo $nick]"
 				set zrl "[zboe::sql::util::checkclips $nick]";
 				set zrma "[zboe::sql::util::checkmaxammo $nick]";
-				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "Reload: Checking Ammo"; }
+				if {${zboe::settings::debug} >= "3"} { zboe::util::zboedbg "Reload: Checking Ammo"; }
 				if {$zpam >= 1} { putserv "PRIVMSG $chan :errr! your clip isnt empty!"; return }
-				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "Reload: Checking Clip Storage"; }
+				if {${zboe::settings::debug} >= "3"} { zboe::util::zboedbg "Reload: Checking Clip Storage"; }
 				if {$zrl == 0} { putserv "PRIVMSG $chan :errr! You have no clips!"; return }
-				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "Reload: Reloading!!"; }
 				zboe::sql::util::changeammo "$nick" "$zrma"
 				incr zrl -1
 				zboe::sql::util::changeclips "$nick" "$zrl"
