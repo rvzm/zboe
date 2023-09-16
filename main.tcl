@@ -115,7 +115,18 @@ namespace eval zboe {
 			if {$v1 == "die"} { die; return }
 			if {$v1 == "info"} { putserv "PRIVMSG $chan :zboe.tcl running version [zboe::util::getVersion]"; return }
 			if {$v1 == "chanset"} { channel set $chan "$v2"; return }
-			if {$v1 == "z"} { putserv "PRIVMSG $chan :o.0.O.0.o Rolling Encounter..."; zboe::procs::zhunt::zspawn; return }
+			if {$v1 == "z"} {
+				if {$v2 == ""} {
+					putserv "PRIVMSG $chan :o.0.O.0.o Rolling Encounter..."
+					zboe::procs::zhunt::zspawn
+					return 
+				}
+				putserv "PRIVMSG $chan :o.0.O.0.o Rolling $v2 Encounters..."
+				set zzc "[zboe::sql::util::checksetting zombiecount]"
+				incr zzc "$v2"
+				zboe::sql::util::changesetting "zombiecount" $zzc
+				return
+			}
 			if {$v1 == "zc"} {
 				set zccz "[zboe::sql::util::checksetting zombiecount]";
 				set zcah "[zboe::sql::util::checksetting hunt]";
