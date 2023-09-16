@@ -138,11 +138,13 @@ namespace eval zboe {
 			putserv "NOTICE $nick :Error- No control command given. use '${zboe::settings::gen::controller} help' to see commands."
 		}
 		proc version {nick uhost hand chan text} {
+				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "version command issued"; }
 			putserv "PRIVMSG $chan :zboe -> version-[zboe::util::getVersion] build [zboe::util::getBuild]"
 			putserv "PRIVMSG $chan :zboe -> release: [zboe::util::getRelease]"
 			return
 		}
 		proc register {nick uhost hand chan text} {
+			if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "register command issued"; }
 			if {[validuser $hand] == "1"} { putserv "PRIVMSG $chan :Sorry $nick, but you're already registered. :)"; return }
 			if {[adduser $hand $uhost] == "1"} {
 				putserv "PRIVMSG [zboe::util::homechan] :*** Introduced user - $nick / $uhost"
@@ -392,6 +394,7 @@ namespace eval zboe {
 				return
 			}
 			proc shop {nick uhost hand chan text} {
+				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "shop command issued"; }
 				if {![channel get $chan hunt]} { putserv "PRIVMSG $chan : :o.0.O.0.o Err - This channel is not participating in the hunt."; return }
 				set v1 [lindex [split $text] 0]
 				set v2 [lindex [split $text] 1]
