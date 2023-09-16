@@ -342,11 +342,11 @@ namespace eval zboe {
 							incr zpx 5
 							incr zaz -1
 							incr zakc 1
-							if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "updating xp $nick $zpx "; }
+							if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "updating xp $nick $zpx "; }
 							zboe::sql::util::changexp "$nick" "$zpx"
-							if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "updating zombiecount $zaz "; }
+							if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "updating zombiecount $zaz "; }
 							zboe::sql::util::changesetting "zombiecount" "$zaz"
-							if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "updating kills $nick $zakc "; }
+							if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "updating kills $nick $zakc "; }
 							zboe::sql::util::changekills "$nick" "$zakc"
 							if {${zboe::settings::hunt::horde} == "yes"} {
 								if {$zaz == "0"} {
