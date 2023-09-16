@@ -15,6 +15,7 @@ namespace eval zboe {
 		bind pub - ${zboe::settings::gen::pubtrig}zboe zboe::procs::zboe:main
 		bind pub - ${zboe::settings::gen::pubtrig}version zboe::procs::version
 		bind pub - ${zboe::settings::gen::pubtrig}shoot zboe::procs::zhunt::shoot
+		bind pub - ${zboe::settings::gen::pubtrig}jam zboe::procs::zhunt::jam
 		bind pub - ${zboe::settings::gen::pubtrig}shop zboe::procs::zhunt::shop
 		bind pub - ${zboe::settings::gen::pubtrig}reload zboe::procs::zhunt::reload
 		bind pub - ${zboe::settings::gen::pubtrig}zstats zboe::procs::zhunt::zstats
@@ -296,7 +297,12 @@ namespace eval zboe {
 				set zschk "[zboe::sql::util::checksetting hunt]"
 				set zaz "[zboe::sql::util::checksetting zombiecount]"
 				set zakc "[zboe::sql::util::checkkills $nick]"
+				set zagc "[zboe::sql::util::checkcondition $nick]"
 				if {$zschk == "yes"} {
+					if {$zagc == "0"} {
+						putserv "PRIVMSG $chan :o.0.O.0.o errr! your gun is broken dipshit, use the shop to buy a new one, or painstakingly grease your current back to life if you're sentimental :P"
+						return
+					}
 					set zpam "[zboe::sql::util::checkammo $nick]"
 					if {$zaz >= "1"} {
 						if {$zpam == "0"} {
@@ -308,6 +314,16 @@ namespace eval zboe {
 						set zpx "[zboe::sql::util::checkxp $nick]"
 						set zpchk "[rand 99]"
 						if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "shoot $nick / ammo $zpam / xp $zpx "; }
+						set zpjc "[rand 65]"
+						incr zagc -2
+						if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "updating condition $nick $zagc "; }
+						zboe::sql::util::changecondition "$nick" "$zagc"
+						if {$zpjc >= $zagc} {
+							if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "shoot //JAM $nick"; }
+							putserv "PRIVMSG $chan :o.0.O.0.o FUCK!!! You got a jam, use @jam to unjam";
+							zboe::sql::util::changejam "$nick" "yes"
+							return
+						}
 						zboe::sql::util::changeammo "$nick" $zpam
 						if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "shoot acc: $zpacc check: $zpchk "; }
 						if {$zpchk <= $zpacc} {
@@ -351,6 +367,26 @@ namespace eval zboe {
 				putserv "PRIVMSG $chan :o.0.O.0.o there isnt an active hunt gaylord";
 				return;
 			}
+			proc jam {nick uhost hand chan text} {
+				if {${zboe::settings::debug} >= "1"} { zboe::util::zboedbg "jam command issued"; }
+				if {![channel get $chan hunt]} { putserv "PRIVMSG $chan : :o.0.O.0.o Err - This channel is not participating in the hunt."; return }
+				set zjgj "[zboe::sql::util::checkjam $nick]"
+				set zjcl "[zboe::sql::util::checkclips $nick]"
+				set zjam "[zboe::sql::util::checkammo $nick]"
+				if {$zjgj == "no"} {
+					putserv "PRIVMSG $chan :Error - You do not have a jam"
+					return
+				}
+				if {$zjcl == "0"} {
+					putserv "PRIVMSG $chan :Error - You dont have a clip to unjam with"
+					return
+				}
+				incr zjam -1
+				zboe::sql::util::changejam "$nick" "no"
+				zboe::sql::util::changeammo "$nick" "$zjam"
+				putserv "PRIVMSG $chan :o.0.O.0.o You have unjammed your gun"
+				return
+			}
 			proc shop {nick uhost hand chan text} {
 				set v1 [lindex [split $text] 0]
 				set v2 [lindex [split $text] 1]
@@ -364,6 +400,7 @@ namespace eval zboe {
 				set zspl "[zboe::sql::util::checklevel $nick]"
 				set zsac "[zboe::sql::util::checkaccuracy $nick]"
 				set zsht "[zboe::sql::util::checkhordetokens $nick]"
+				set zsgc "[zboe::sql::util::checkcondition $nick]"
 				if {$v1 == "1"} {
 					if {$zspx >= ${zboe::settings::shop::clips}} {
 						if {$zscl < $zsmc} {
@@ -430,6 +467,34 @@ namespace eval zboe {
 					putserv "NOTICE $nick :o.0.O.0.o Error: You cannot afford that item!";
 					return
 				}
+				if {$v1 == "6"} {
+					if {$zspx >= ${zboe::settings::shop::gungrease}} {
+						incr zspx "-${zboe::settings::shop::gungrease}"
+						incr zsgc "10"
+						if {$zsgc > "100"} { set zsgc "100"; }
+						putserv "NOTICE $nick :o.0.O.0.o Gun Condition inreased to $zsgc";
+						zboe::sql::util::changexp "$nick" "$zspx"
+						zboe::sql::util::changecondition "$nick" "$zsgc"
+						return
+					}
+					putserv "NOTICE $nick :o.0.O.0.o Error: You cannot afford that item!";
+					return
+				}
+				if {$v1 == "7"} {
+					if {$zspx >= ${zboe::settings::shop::newgun}} {
+						if {$zsgc == "0"} {
+							incr zspx "-${zboe::settings::shop::newgun}"
+							set zsgc "100"
+							putserv "NOTICE $nick :o.0.O.0.o You purchased a new gun!";
+							zboe::sql::util::changexp "$nick" "$zspx"
+							zboe::sql::util::changecondition "$nick" "$zsgc"
+							return
+						}
+						putserv "NOTICE $nick :o.0.O.0.o Error: Your gun isnt broken!!"
+					}
+					putserv "NOTICE $nick :o.0.O.0.o Error: You cannot afford that item!";
+					return
+				}
 				if {$v1 == "arsenal"} {
 					if {$v2 == "rifle"} {
 						putcmdlog "***zboe|debug| arsenal - rifle - $nick";
@@ -480,7 +545,7 @@ namespace eval zboe {
                     return 
                 } else {
                     putcmdlog "***zboe|debug-sql| Creating user $user row"
-                    zdb eval {INSERT INTO users VALUES($user, 0, 1, 0, 55, "no", 6, 3, 6, 3, 0)} -parameters [list user $user]
+                    zdb eval {INSERT INTO users VALUES($user, 0, 1, 0, 55, "no", 6, 3, 6, 3, 0, 100)} -parameters [list user $user]
 					putcmdlog "***zboe|debug-sql| User row $user Created"
                 }
             }
@@ -489,8 +554,8 @@ namespace eval zboe {
 				putcmdlog "***zboe|debug-sql| initializing sql"
                 zdb eval {CREATE TABLE settings(hunt TEXT, zombiecount INTEGER, fullhorde TEXT, id INTEGER)}
                 zdb eval {INSERT INTO settings VALUES('no', 0, 'no', 0)}
-				#                               0           1            2           3              4                 5        6              7              8                 9                 10              
-				zdb eval {CREATE TABLE users(user TEXT, xp INTEGER, level INTEGER, kills INTEGER, accuracy INTEGER, jam TEXT, ammo INTEGER, clips INTEGER, maxammo INTEGER, maxclips INTEGER, hordetokens INTEGER)}
+				#                               0           1            2           3              4                 5        6              7              8                 9                 10                     11    
+				zdb eval {CREATE TABLE users(user TEXT, xp INTEGER, level INTEGER, kills INTEGER, accuracy INTEGER, jam TEXT, ammo INTEGER, clips INTEGER, maxammo INTEGER, maxclips INTEGER, hordetokens INTEGER, condition INTEGER)}
 				putcmdlog "***zboe|debug-sql| SQL Database initialized"
             }
 
@@ -556,7 +621,10 @@ namespace eval zboe {
                 set zdbrt "[zdb eval {SELECT * FROM users WHERE user=$user}]"
                 return [lindex [split $zdbrt] 10]
             }
-
+			proc checkcondition {user} {
+                set zdbrt "[zdb eval {SELECT * FROM users WHERE user=$user}]"
+                return [lindex [split $zdbrt] 11]
+            }
             proc checkkills {user} {
                 set zdbrt "[zdb eval {SELECT * FROM users WHERE user=$user}]"
                 return [lindex [split $zdbrt] 3]
@@ -600,6 +668,9 @@ namespace eval zboe {
 
             proc changekills {user v} {
                 zdb eval "UPDATE users SET kills = ('$v') WHERE USER = '$user'"
+            }
+			proc changecondition {user v} {
+                zdb eval "UPDATE users SET condition = ('$v') WHERE USER = '$user'"
             }
         }   
     }
