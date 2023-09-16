@@ -3,7 +3,7 @@ namespace eval zboe {
 		variable version "0.2d"
 		variable build "090803"
 		variable release "dev"
-		variable debug "2"
+		variable debug "0"
 		namespace eval gen {
 			variable pubtrig "@"
 			variable controller "~z"
