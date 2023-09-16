@@ -419,7 +419,7 @@ namespace eval zboe {
 					return
 				}
 				if {$v1 == "5"} {
-					if {$zspx >= ${zboe::settings::shop::clipupgrade}} {
+					if {$zsht >= ${zboe::settings::shop::clipupgrade}} {
 						incr zsht "-${zboe::settings::shop::clipupgrade}"
 						incr zsmc
 						putserv "NOTICE $nick :o.0.O.0.o Max Clips inreased to $zsmc";
