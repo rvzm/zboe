@@ -293,6 +293,7 @@ namespace eval zboe {
 				if {$zpam >= 1} { putserv "PRIVMSG $chan :errr! your clip isnt empty!"; return }
 				if {${zboe::settings::debug} >= "3"} { zboe::util::zboedbg "Reload: Checking Clip Storage"; }
 				if {$zrl == 0} { putserv "PRIVMSG $chan :errr! You have no clips!"; return }
+				if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "Reload: Reloading!!"; }
 				zboe::sql::util::changeammo "$nick" "$zrma"
 				incr zrl -1
 				zboe::sql::util::changeclips "$nick" "$zrl"
