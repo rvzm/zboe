@@ -7,6 +7,8 @@ if {[catch {source scripts/zboe/zboe-settings.tcl} err]} {
 }
 package require sqlite3;
 sqlite3 zdb "${zboe::settings::gen::sqldir}zhunt.sql" -create true -readonly false
+zdb cache flush
+
 namespace eval zboe {
 	namespace eval binds {
 		# Main Commands
