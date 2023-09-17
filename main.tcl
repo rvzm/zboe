@@ -509,7 +509,7 @@ namespace eval zboe {
 				}
 				if {$v1 == "7"} {
 					if {$zspx >= ${zboe::settings::shop::newgun}} {
-						if {$zsgc == "0"} {
+						if {$zsgc <= "30"} {
 							incr zspx "-${zboe::settings::shop::newgun}"
 							set zsgc "100"
 							putserv "NOTICE $nick :o.0.O.0.o You purchased a new gun!";
@@ -517,7 +517,7 @@ namespace eval zboe {
 							zboe::sql::util::changecondition "$nick" "$zsgc"
 							return
 						}
-						putserv "NOTICE $nick :o.0.O.0.o Error: Your gun isnt broken!!"
+						putserv "NOTICE $nick :o.0.O.0.o Error: Your gun is still in good condition!!"
 					}
 					putserv "NOTICE $nick :o.0.O.0.o Error: You cannot afford that item!";
 					return
