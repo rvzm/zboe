@@ -334,7 +334,7 @@ namespace eval zboe {
 						set zpacc "[zboe::sql::util::checkaccuracy $nick]"
 						set zpx "[zboe::sql::util::checkxp $nick]"
 						set zpchk "[rand 99]"
-						set zpjc "[rand 65]"
+						set zpjc "[rand 40]"
 						incr zagc -2
 						if {${zboe::settings::debug} >= "2"} { zboe::util::zboedbg "updating condition $nick $zagc "; }
 						zboe::sql::util::changecondition "$nick" "$zagc"
